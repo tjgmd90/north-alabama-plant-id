@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>North Alabama Plant ID Trainer</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0;background:#f4f1e8;color:#24321f}
+header{background:#284b32;color:white;padding:20px 16px;position:sticky;top:0;z-index:2}
+h1{margin:0;font-size:24px}.sub{opacity:.85;margin-top:5px}
+nav{display:flex;gap:8px;overflow:auto;padding:10px;background:#fff;border-bottom:1px solid #ddd}
+button{border:0;border-radius:10px;padding:10px 13px;font-weight:600;background:#e2eadf;color:#24321f}
+button.active{background:#284b32;color:white}
+main{max-width:850px;margin:auto;padding:16px}
+.card{background:white;border-radius:18px;padding:18px;box-shadow:0 3px 14px #0001;margin-bottom:15px}
+.photo{width:100%;height:330px;object-fit:cover;border-radius:13px;background:#ddd;display:block}
+.photo.loading{visibility:hidden}
+.photo-wrap{position:relative;width:100%;height:330px;border-radius:13px;background:#ddd;overflow:hidden}
+.loading-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#667;font-size:15px}
+.tag{display:inline-block;border-radius:20px;background:#e8efe5;padding:6px 9px;margin:8px 4px 0 0;font-size:13px}
+.choice{display:block;width:100%;margin:9px 0;text-align:left;background:#f1f4ef}
+.choice.correct{background:#cde8cc}.choice.wrong{background:#f2cccc}
+.small{font-size:13px;color:#667}
+.progress{height:9px;background:#ddd;border-radius:10px;overflow:hidden}.bar{height:100%;background:#6c8f62}
+a{color:#315d3b}.big{font-size:22px;font-weight:700}
+</style></head><body>
+<header><h1>🌱 North Alabama Plant ID</h1><div class="sub">Pasture • native plants • weeds • turkey habitat</div></header>
+<nav id="nav"></nav><main id="app"></main>
+<script>
+const plants = [
+["Common ragweed","Ambrosia artemisiifolia","Native forb","🦃 High","Seeds and insect-rich early succession; important turkey habitat plant."],
+["Partridge pea","Chamaecrista fasciculata","Native forb","🦃 High","Native annual legume; characteristic early-successional wildlife plant."],
+["Smartweed","Persicaria spp.","Native/variable forb","🦃 High","Seed-producing forb associated with moist/disturbed sites; learn the local species."],
+["Goldenrod","Solidago spp.","Native forb","🦃 High","Important flowering forb/insect resource; several Alabama species."],
+["Blackberry","Rubus spp.","Native shrub","🦃 High","Dense cover, soft mast and nesting/brooding structure."],
+["Pokeweed","Phytolacca americana","Native forb","🦃 High","Native perennial with fruit; also important to recognize because livestock toxicity is a concern."],
+["Beggar's-lice","Desmodium spp.","Native forb","🦃 High","Native legume; seeds and insects; several species occur in Alabama."],
+["Jointvetch","Aeschynomene spp.","Native/variable forb","🦃 High","Highlighted in Wild Turkey Science habitat discussions; learn it in context."],
+["Little bluestem","Schizachyrium scoparium","Native warm-season grass","🦃 High","Native bunchgrass providing structure without forming a dense sod."],
+["Big bluestem","Andropogon gerardii","Native warm-season grass","🦃 High","Native warm-season bunchgrass; important wildlife and forage species."],
+["Indiangrass","Sorghastrum nutans","Native warm-season grass","🦃 High","Native bunchgrass used in wildlife and forage plantings."],
+["Switchgrass","Panicum virgatum","Native warm-season grass","🦃 High","Native warm-season grass; useful structure but can become very dense."],
+["Eastern gamagrass","Tripsacum dactyloides","Native warm-season grass","🦃 Medium","Native warm-season forage with wildlife value."],
+["Bahiagrass","Paspalum notatum","Introduced pasture grass","🐄 High","Major Alabama pasture grass; dense sod can reduce turkey brood habitat."],
+["Bermudagrass","Cynodon dactylon","Introduced pasture grass","🐄 High","Common sod-forming pasture grass; important to recognize when managing wildlife openings."],
+["Dallisgrass","Paspalum dilatatum","Introduced pasture grass","🐄 High","Common warm-season pasture grass in Alabama."],
+["Tall fescue","Schedonorus arundinaceus","Introduced cool-season grass","🐄 High","Important Alabama forage but dense cool-season cover can be poor brood habitat."],
+["Johnsongrass","Sorghum halepense","Introduced/problem grass","⚠️ High","Problematic perennial grass; recognize before control decisions."],
+["Japanese stiltgrass","Microstegium vimineum","Invasive grass","🚫 High","Invasive shade-tolerant grass; especially important in woodland edges and disturbed areas."],
+["Foxtail","Setaria spp.","Annual grass/weed","⚠️ High","Common pasture weed group; learn seedhead and leaf characteristics."],
+["Carolina horsenettle","Solanum carolinense","Native/problem forb","⚠️ High","Spiny perennial; important pasture weed and livestock-recognition plant."],
+["Bull thistle","Cirsium vulgare","Introduced weed","⚠️ High","Spiny biennial thistle; recognizable by winged/spiny leaves and flower heads."],
+["Musk thistle","Carduus nutans","Introduced weed","⚠️ Medium","Introduced thistle; important to distinguish from native thistles."],
+["Marestail","Erigeron canadensis","Native/variable weed","⚠️ Medium","Common disturbed-ground plant; herbicide resistance can occur."],
+["Spiny amaranth","Amaranthus spinosus","Introduced/problem forb","⚠️ Medium","Spiny annual pasture weed; learn the paired spines at leaf axils."],
+["Winged sumac","Rhus copallinum","Native shrub","🦃 High","Native early-successional woody plant; can expand rapidly after disturbance."],
+["Virginia pine","Pinus virginiana","Native tree","🌳 Medium","Common pioneer pine on upland disturbed sites; important North Alabama field/forest species."],
+["Greenbrier","Smilax spp.","Native vine","🦃 Medium","Provides cover and browse; several species are common in Alabama."],
+["Sedge","Carex spp.","Native grass-like plant","🌱 Medium","Grass-like plants with ecological importance; learn to distinguish sedges from grasses."],
+["Broomsedge","Andropogon virginicus","Native warm-season grass","🦃 Medium","Common old-field grass; useful indicator of low-fertility/disturbed sites."],
+["Giant ragweed","Ambrosia trifida","Native forb","🦃 High","Tall annual forb of disturbed ground and field edges; useful seed and insect resource."],
+["Lanceleaf coreopsis","Coreopsis lanceolata","Native forb","🦃 Medium","Native perennial wildflower of sunny open sites."],
+["Black-eyed Susan","Rudbeckia hirta","Native/variable forb","🦃 Medium","Common native wildflower of sunny disturbed sites and grasslands."],
+["Butterfly milkweed","Asclepias tuberosa","Native forb","🦋 High","Native milkweed of dry open sites; important host plant for monarchs."],
+["New England aster","Symphyotrichum novae-angliae","Native forb","🦃 Medium","Late-season flowering forb useful to insects and wildlife."],
+["Ironweed","Vernonia spp.","Native forb","🦃 Medium","Native perennial forb group common in fields and moist open sites."],
+["Sunflower","Helianthus spp.","Native/variable forb","🦃 High","Sunflower species provide seed and insect resources; several occur in Alabama."],
+["American wild onion","Allium canadense","Native forb","🌱 Medium","Native perennial onion; distinguish it from nonnative field garlic."],
+["Eastern columbine","Aquilegia canadensis","Native forb","🌱 Medium","North Alabama native wildflower of part shade and moist sites."],
+["River oats","Chasmanthium latifolium","Native grass","🦃 Medium","Native woodland-edge grass with distinctive drooping seedheads."],
+["Pink muhly grass","Muhlenbergia capillaris","Native grass","🦃 Medium","Native warm-season bunchgrass of dry to moist sunny sites."],
+["Purpletop","Tridens flavus","Native warm-season grass","🦃 Medium","Native bunchgrass of fields, roadsides and open woodland edges."],
+["Splitbeard bluestem","Andropogon ternarius","Native warm-season grass","🦃 Medium","Native bunchgrass of dry open sites; distinctive fluffy seedheads."],
+["Gulfdune paspalum","Paspalum monostachyum","Native warm-season grass","🦃 Medium","Native warm-season grass of open sites; useful for learning paspalum characteristics."],
+["Big carpetgrass","Axonopus compressus","Introduced pasture grass","🐄 Medium","Warm-season sod-forming grass found in suitable Alabama sites."],
+["Orchardgrass","Dactylis glomerata","Introduced cool-season grass","🐄 High","Cool-season forage grass used in pastures and hayfields."],
+["White clover","Trifolium repens","Introduced forage legume","🐄 High","Common cool-season perennial pasture legume."],
+["Crimson clover","Trifolium incarnatum","Introduced forage legume","🐄 High","Cool-season annual legume used in Alabama forage and wildlife plantings."],
+["Arrowleaf clover","Trifolium vesiculosum","Introduced forage legume","🐄 High","Cool-season annual clover used in Alabama forage and wildlife plantings."],
+["Red clover","Trifolium pratense","Introduced forage legume","🐄 Medium","Cool-season forage legume used in suitable sites."],
+["Alfalfa","Medicago sativa","Introduced forage legume","🐄 High","High-quality perennial forage legume requiring suitable soils and management."],
+["Forage chicory","Cichorium intybus","Introduced forage forb","🐄 High","Perennial forage forb included in Alabama wildlife planting recommendations."],
+["Austrian winter pea","Pisum sativum subsp. arvense","Introduced forage legume","🦃 High","Cool-season annual legume used in Alabama wildlife plantings."],
+["Wheat","Triticum aestivum","Introduced crop","🦃 High","Cool-season grain commonly used in Alabama wildlife food plots."],
+["Oats","Avena sativa","Introduced crop","🦃 High","Cool-season grain used for winter wildlife food plots."],
+["Browntop millet","Urochloa ramosa","Introduced annual grass","🦃 High","Warm-season annual grain used in Alabama wildlife plantings."],
+["Chufa","Cyperus esculentus","Wildlife planting crop","🦃 High","Sedge cultivated specifically as a turkey food-plot crop."],
+["Corn","Zea mays","Crop","🦃 High","Warm-season grain used as supplemental wildlife food."],
+["Soybean","Glycine max","Crop/forage legume","🦃 High","Warm-season crop used as supplemental wildlife food."],
+["Broadleaf plantain","Plantago major","Introduced weed","⚠️ Medium","Low rosette-forming broadleaf weed common in compacted soils."],
+["Buckhorn plantain","Plantago lanceolata","Introduced weed","⚠️ Medium","Narrow-leaved rosette weed common in pastures."],
+["Dandelion","Taraxacum officinale","Introduced weed","⚠️ Medium","Familiar basal-rosette plant common in disturbed turf and pasture."],
+["Crabgrass","Digitaria spp.","Annual grass/weed","⚠️ High","Common warm-season annual grass in pastures and disturbed ground."],
+["Goosegrass","Eleusine indica","Annual grass/weed","⚠️ Medium","Compact annual grass of disturbed and heavily trafficked soils."],
+["Canada thistle","Cirsium arvense","Introduced weed","⚠️ High","Perennial thistle capable of spreading by roots and seed."],
+["Common pokeweed","Phytolacca americana","Native forb","🦃 High","Native perennial with dark fruit; important field-identification plant."],
+["Butterfly pea","Centrosema virginianum","Native legume vine","🦃 Medium","Native twining legume of open woods and old fields."],
+["Maypop","Passiflora incarnata","Native vine","🦃 Medium","Native perennial vine of open fields and edges; distinctive passionflower."],
+["Wild bergamot","Monarda fistulosa","Native forb","🦋 Medium","Native mint-family forb of sunny fields and open woodland edges."],
+["Post oak","Quercus stellata","Native tree","🦃 High","Native oak producing acorns important to wildlife."],
+["White oak","Quercus alba","Native tree","🦃 High","Important mast-producing tree; acorns are major wildlife food."],
+["Black oak","Quercus velutina","Native tree","🦃 High","Native upland oak producing wildlife-important acorns."],
+["Southern red oak","Quercus falcata","Native tree","🦃 High","Common southeastern oak producing acorns for wildlife."]
+]
+];
+
+let mode='quiz',idx=0,score=0,answered=false;
+let quizOrder=[];
+
+const app=document.getElementById('app'),nav=document.getElementById('nav');
+
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+function startQuiz(){
+  quizOrder=shuffle(plants);
+  idx=0;
+  score=0;
+  answered=false;
+}
+
+['quiz','learn','turkey','pasture'].forEach(x=>{
+  let b=document.createElement('button');
+  b.textContent={quiz:'🎯 Quiz',learn:'📚 Learn',turkey:'🦃 Turkey focus',pasture:'🐄 Pasture'}[x];
+  b.onclick=()=>{
+    mode=x;
+    if(x==='quiz') startQuiz();
+    else {idx=0;score=0;answered=false;}
+    render();
+  };
+  nav.appendChild(b);
+});
+
+async function gbifImages(name){
+  try{
+    const s=await fetch(
+      'https://api.gbif.org/v1/species/match?name='+encodeURIComponent(name)
+    ).then(r=>r.json());
+
+    if(!s.usageKey) return [];
+
+    const d=await fetch(
+      'https://api.gbif.org/v1/occurrence/search?taxon_key='+s.usageKey+
+      '&media_type=StillImage&limit=40'
+    ).then(r=>r.json());
+
+    const candidates=[];
+    for(const rec of (d.results||[])){
+      for(const m of (rec.media||[])){
+        if(m && m.identifier && (!m.type || m.type.startsWith('StillImage'))){
+          candidates.push({
+            url:m.identifier,
+            source:rec.publisher||rec.institutionCode||'GBIF'
+          });
+        }
+      }
+    }
+
+    // Remove duplicate URLs and randomize the order so we don't always hit
+    // the same broken specimen first.
+    const seen=new Set();
+    return shuffle(candidates).filter(x=>{
+      if(seen.has(x.url)) return false;
+      seen.add(x.url);
+      return true;
+    });
+  }catch(e){
+    return [];
+  }
+}
+
+function tags(p){
+  return `<span class="tag">${p[2]}</span><span class="tag">${p[3]}</span>`;
+}
+
+async function imageFor(p){
+  const box=document.getElementById('photo');
+  const label=document.getElementById('loadingLabel');
+  const source=document.getElementById('source');
+
+  if(!box || !label || !source) return;
+
+  // Do not expose the plant name in alt text or while an image is loading.
+  box.alt='Specimen photo';
+  box.removeAttribute('src');
+  box.classList.add('loading');
+  label.textContent='Loading specimen photo…';
+  source.textContent='Finding a usable specimen photo…';
+
+  const candidates=await gbifImages(p[1]);
+
+  if(!candidates.length){
+    box.classList.remove('loading');
+    label.textContent='Photo unavailable';
+    source.textContent='No usable image found; use the photo-search link below.';
+    return;
+  }
+
+  // Try photos one at a time. If a GBIF image host is broken/blocked,
+  // immediately move to another real specimen photo.
+  for(const x of candidates){
+    const preload=new Image();
+
+    const loaded=await new Promise(resolve=>{
+      let finished=false;
+      const done=v=>{
+        if(finished)return;
+        finished=true;
+        resolve(v);
+      };
+      preload.onload=()=>done(true);
+      preload.onerror=()=>done(false);
+      setTimeout(()=>done(false),7000);
+      preload.src=x.url;
+    });
+
+    if(loaded){
+      box.src=x.url;
+      box.alt='Specimen photo';
+      box.classList.remove('loading');
+      label.textContent='';
+      source.innerHTML=`Photo: ${x.source} via GBIF. <a target="_blank" rel="noopener" href="https://www.gbif.org/">GBIF</a>`;
+      return;
+    }
+  }
+
+  box.classList.remove('loading');
+  label.textContent='Photo unavailable';
+  source.textContent='No usable image loaded; use the photo-search link below.';
+}
+
+function photoBox(){
+  return `<div class="photo-wrap"><div id="loadingLabel" class="loading-label">Loading specimen photo…</div><img id="photo" class="photo loading" alt="Specimen photo"></div>`;
+}
+
+function learnCard(p){
+  return `<div class="card">${photoBox()}<div id="source" class="small">Finding a usable specimen photo…</div><h2>${p[0]}</h2><div><i>${p[1]}</i></div>${tags(p)}<p>${p[4]}</p><p class="small">Use the image as a field-ID aid, then confirm with a regional flora/extension reference before making management decisions.</p><a target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(p[0]+' '+p[1]+' Alabama plant')}">Find more Alabama photos →</a></div>`;
+}
+
+function render(){
+  document.querySelectorAll('nav button').forEach((b,i)=>
+    b.classList.toggle('active',['quiz','learn','turkey','pasture'][i]===mode)
+  );
+
+  if(mode==='learn'){
+    let p=plants[idx%plants.length];
+    app.innerHTML=learnCard(p)+`<button onclick="idx++;render()">Next plant →</button>`;
+    imageFor(p);
+    return;
+  }
+
+  let pool=mode==='turkey'
+    ?plants.filter(p=>p[3].includes('🦃'))
+    :mode==='pasture'
+      ?plants.filter(p=>p[2].includes('pasture')||p[2].includes('weed')||p[2].includes('grass')||p[2].includes('problem')||p[2].includes('Invasive'))
+      :plants;
+
+  // Quiz uses a shuffled deck, so every plant appears once in a random order.
+  let p=mode==='quiz'
+    ?quizOrder[idx]
+    :pool[idx%pool.length];
+
+  if(mode==='quiz'){
+    // Choose distractors by FIELD-ID SIMILARITY, not just by broad type.
+    // The goal is for a user to have to notice leaf shape, growth form,
+    // seedhead, habitat, etc., rather than eliminating obviously unrelated plants.
+    function idProfile(x){
+      const n=(x[0]+' '+x[1]).toLowerCase();
+      const c=x[2].toLowerCase();
+
+      let family='other', form='other', habitat='open';
+      if(n.includes('ragweed')) family='ragweed';
+      else if(n.includes('thistle')) family='thistle';
+      else if(n.includes('clover') || n.includes('pea') || n.includes('desmodium') ||
+              n.includes('jointvetch') || n.includes('alfalfa') || n.includes('centrosema')) family='legume';
+      else if(n.includes('milkweed')) family='milkweed';
+      else if(n.includes('goldenrod') || n.includes('aster') || n.includes('coreopsis') ||
+              n.includes('black-eyed') || n.includes('sunflower') || n.includes('ironweed') ||
+              n.includes('yarrow') || n.includes('dandelion') || n.includes('bergamot')) family='flowering-forb';
+      else if(n.includes('pokeweed')) family='pokeweed';
+      else if(n.includes('horsenettle') || n.includes('horsenettle')) family='nightshade';
+      else if(n.includes('plantain')) family='plantain';
+      else if(n.includes('amaranth')) family='amaranth';
+      else if(n.includes('marestail') || n.includes('horseweed')) family='fleabane';
+      else if(n.includes('smartweed')) family='smartweed';
+      else if(n.includes('oak')) family='oak';
+      else if(n.includes('pine')) family='pine';
+      else if(n.includes('sumac')) family='sumac';
+      else if(n.includes('greenbrier') || n.includes('maypop') || n.includes('butterfly pea')) family='vine';
+      else if(n.includes('sedge') || n.includes('chufa')) family='sedge';
+      else if(n.includes('bluestem') || n.includes('broomsedge') || n.includes('purpletop') ||
+              n.includes('indian') || n.includes('switchgrass') || n.includes('gamagrass') ||
+              n.includes('river oats') || n.includes('muhly')) family='native-grass';
+      else if(n.includes('bahiagrass') || n.includes('bermudagrass') || n.includes('dallisgrass') ||
+              n.includes('carpetgrass')) family='warm-season-pasture-grass';
+      else if(n.includes('fescue') || n.includes('orchardgrass')) family='cool-season-grass';
+      else if(n.includes('johnsongrass') || n.includes('stiltgrass') || n.includes('foxtail') ||
+              n.includes('crabgrass') || n.includes('goosegrass')) family='annual-or-invasive-grass';
+
+      if(c.includes('tree')) form='tree';
+      else if(c.includes('shrub')) form='shrub';
+      else if(c.includes('vine')) form='vine';
+      else if(c.includes('grass') || c.includes('sedge')) form='grasslike';
+      else if(c.includes('forb') || c.includes('weed') || c.includes('legume')) form='forb';
+
+      if(n.includes('wood') || n.includes('oak') || n.includes('pine') || n.includes('greenbrier'))
+        habitat='woodland-edge';
+      else if(n.includes('chufa') || n.includes('smartweed')) habitat='moist/open';
+
+      return {family,form,habitat};
+    }
+
+    function similarity(a,b){
+      const A=idProfile(a), B=idProfile(b);
+      let s=0;
+      if(A.family===B.family) s+=100;
+      if(A.form===B.form) s+=25;
+      if(A.habitat===B.habitat) s+=10;
+
+      // Keep choices from the same field-ID neighborhood even when exact
+      // family matches are unavailable.
+      const grassFamilies=['native-grass','warm-season-pasture-grass','cool-season-grass',
+                           'annual-or-invasive-grass'];
+      if(grassFamilies.includes(A.family) && grassFamilies.includes(B.family)) s+=35;
+
+      const forbFamilies=['flowering-forb','ragweed','thistle','legume','milkweed',
+                          'pokeweed','nightshade','plantain','amaranth','fleabane','smartweed'];
+      if(forbFamilies.includes(A.family) && forbFamilies.includes(B.family)) s+=20;
+
+      return s;
+    }
+
+    let distractors=pool.filter(x=>x!==p)
+      .map(x=>({plant:x,score:similarity(p,x),tie:Math.random()}))
+      .sort((a,b)=>b.score-a.score || a.tie-b.tie)
+      .slice(0,10)
+      .map(x=>x.plant);
+
+    // Randomly select among the best matches so the same three distractors
+    // aren't repeated every time.
+    const bestScore=similarity(p,distractors[0]||p);
+    const top=distractors.filter(x=>similarity(p,x)>=bestScore-20);
+    const others=shuffle(top.length>=3?top:distractors).slice(0,3);
+    const opts=shuffle([p,...others]);
+
+    app.innerHTML=`<div class="card">
+      <div class="small">Question ${idx+1} of ${quizOrder.length} • Score ${score}</div>
+      <div class="progress"><div class="bar" style="width:${(idx/quizOrder.length)*100}%"></div></div>
+      ${photoBox()}
+      <div id="source" class="small">Finding a usable specimen photo…</div>
+      <h2>What is this plant?</h2>
+      ${opts.map((o,i)=>`<button class="choice" onclick="answer(this,${o===p})">${o[0]}</button>`).join('')}
+    </div>`;
+    imageFor(p);
+  }else{
+    app.innerHTML=`<div class="card"><div class="big">${mode==='turkey'?'🦃 Turkey Habitat Deck':'🐄 Pasture Deck'}</div><p>Plants prioritized for this topic.</p></div>`+learnCard(p)+`<button onclick="idx++;render()">Next plant →</button>`;
+    imageFor(p);
+  }
+}
+
+function answer(el,ok){
+  if(answered)return;
+  answered=true;
+  el.classList.add(ok?'correct':'wrong');
+  if(ok)score++;
+
+  setTimeout(()=>{
+    if(idx+1>=quizOrder.length){
+      alert(`Quiz complete! You scored ${score} of ${quizOrder.length}. Starting a new randomized quiz.`);
+      startQuiz();
+      render();
+    }else{
+      idx++;
+      answered=false;
+      render();
+    }
+  },850);
+}
+
+startQuiz();
+render();
+</script></body></html>
