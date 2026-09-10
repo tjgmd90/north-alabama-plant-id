@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="app-version" content="2026-09-10-all-plants-ecology-v10">
+<meta name="theme-color" content="#3f5138">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="North Alabama Plant ID">
+<title>North Alabama Plant ID</title>
+<style>
+:root{--green:#3f5138;--dark:#253022;--cream:#f4f1e8;--card:#fff;--muted:#66705f;--line:#dfe3d7;--good:#d9ecd6;--bad:#f3d5d1}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--dark);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{max-width:820px;margin:auto;padding:16px 14px 35px}.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+h1{font-size:28px;margin:4px 0}.tag{color:var(--muted);font-size:14px;margin-bottom:14px}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0 14px}.nav button{padding:10px 5px;font-size:13px;background:#e4e7dc}
+.nav button.active{background:var(--green);color:#fff}.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 5px 20px rgba(30,40,25,.09);margin-bottom:14px}
+h2{margin:2px 0 8px;font-size:23px}.intro{color:var(--muted);line-height:1.5}
+.photo{position:relative;width:100%;aspect-ratio:4/3;border-radius:14px;overflow:hidden;background:#e8e7df;margin:12px 0;display:flex;align-items:center;justify-content:center}
+.photo img{width:100%;height:100%;object-fit:contain;background:#e8e7df;display:none;image-rendering:auto}.loading{color:var(--muted);padding:20px;text-align:center}
+.caption{font-size:12px;color:var(--muted);margin-top:-6px;margin-bottom:10px}.meta{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:9px}
+.question{font-weight:750;font-size:20px;margin:8px 0 12px}.choices{display:grid;gap:9px}button{border:0;border-radius:12px;padding:13px 14px;background:#e6e9df;color:var(--dark);font-size:16px;font-weight:650;cursor:pointer}
+button:disabled{cursor:default}.good{background:var(--good)!important}.bad{background:var(--bad)!important}.primary{background:var(--green);color:white}.feedback{min-height:28px;font-weight:750;margin:12px 0 3px}
+.info{background:#f0f2ea;border-radius:12px;padding:13px;line-height:1.48;margin-top:10px;display:none}.actions{display:flex;gap:8px;margin-top:10px}.actions button{flex:1}.hidden{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.plant{padding:14px;border:1px solid var(--line);border-radius:13px}.plant b{display:block}.plant em{color:var(--muted);font-size:13px}
+.search{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;font-size:16px;margin-bottom:10px}.small{font-size:12px;color:var(--muted);line-height:1.45}.scorebig{text-align:center;font-size:42px;font-weight:800;margin:10px}
+.badge{display:inline-block;font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#e8e1c9;margin-top:7px}.source{font-size:11px;color:var(--muted);margin-top:7px}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.nav button{font-size:12px}}
+
+.controlbar{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 12px}
+.controlbar label{font-size:12px;color:var(--muted);font-weight:700}
+.controlbar select{width:100%;margin-top:4px;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.stat{background:#f0f2ea;border-radius:11px;padding:9px;text-align:center}.stat b{display:block;font-size:18px}.stat span{font-size:11px;color:var(--muted)}
+.filterrow{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.filterrow button{font-size:12px;padding:8px 10px}.filterrow button.active{background:var(--green);color:#fff}
+.diff{font-size:11px;font-weight:800;padding:3px 7px;border-radius:999px;background:#e8e1c9;display:inline-block;margin-top:5px}
+@media(max-width:520px){.controlbar{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><div><h1>North Alabama Plant ID</h1><div class="tag">Native plants • pasture forage • pasture weeds • wildlife habitat</div></div></div>
+<div class="nav"><button data-mode="quiz" class="active">Quiz</button><button data-mode="field">Field</button><button data-mode="learn">Learn</button><button data-mode="inat">iNaturalist</button><button data-mode="habitat">Habitat</button><button data-mode="turkey">Turkey</button><button data-mode="pasture">Pasture</button><button data-mode="invasive">Invasive</button></div>
+
+<section id="quiz" class="card">
+<div id="quizStart">
+<h2>Plant Identification Quiz</h2>
+<div class="intro">Choose your difficulty and question style before starting. Each 10-question quiz uses rotating real field/observation photos and taxonomically sensible answer choices.</div>
+<div class="controlbar">
+<label>Difficulty<select id="quizDifficulty"><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option><option value="expert">Expert</option></select></label>
+<label>Question style<select id="quizStyle"><option value="standard">Standard</option><option value="lookalike">Look-alike challenge</option><option value="review">Review weak plants</option></select></label>
+<label>Quiz pool<select id="quizPool"><option value="all">North Alabama + my iNaturalist</option><option value="regional">North Alabama only</option><option value="inat">My iNaturalist plants only</option></select></label>
+</div>
+<div class="actions"><button id="startQuizBtn" class="primary">Start 10-Question Quiz</button></div>
+</div>
+<div id="quizGame" class="hidden">
+<div class="controlbar"><label>Difficulty<select id="quizDifficultyGame"><option value="mixed">Mixed</option><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option><option value="expert">Expert</option></select></label><label>Question style<select id="quizStyleGame"><option value="standard">Standard</option><option value="lookalike">Look-alike challenge</option><option value="review">Review weak plants</option></select></label><label>Quiz pool<select id="quizPoolGame"><option value="all">North Alabama + my iNaturalist</option><option value="regional">North Alabama only</option><option value="inat">My iNaturalist plants only</option></select></label></div>
+<div class="meta"><span id="progress">Question 1 of 10</span><span id="score">Score: 0</span></div>
+<div class="photo"><div id="qLoading" class="loading">Loading a curated high-quality photo…</div><img id="qImage" alt="Plant identification photo"></div>
+<div class="caption" id="photoCaption">Rotating real field/observation photo. Photos vary by view and are not repeated immediately.</div>
+<div class="actions"><button id="anotherPhoto" class="hidden">Try Another Photo</button></div>
+<div class="question">What plant is this?</div><div id="choices" class="choices"></div><div id="feedback" class="feedback"></div><div id="answerInfo" class="info"></div>
+<div class="actions"><button id="next" class="primary hidden">Next Question</button><button id="restart" class="primary hidden">New Quiz</button></div>
+</div>
+</section>
+
+<section id="field" class="card hidden">
+<h2>Field Mode</h2><div class="intro">A harder, more realistic North Alabama field-ID challenge. Photos favor vegetative, whole-plant and less obvious views.</div>
+<div class="controlbar"><label>Difficulty<select id="fieldDifficulty"><option value="hard">Hard</option><option value="expert">Expert</option></select></label><label>Habitat<select id="fieldHabitat"><option value="all">All habitats</option><option value="old-field">Old field</option><option value="pasture">Pasture / hayfield</option><option value="woodland">Woodland</option><option value="glade">Glade / rocky</option><option value="wet">Wet / riparian</option></select></label></div>
+<div class="meta"><span id="fieldProgress">Question 1 of 10</span><span id="fieldScore">Score: 0</span></div>
+<div class="photo"><div id="fLoading" class="loading">Finding a field photograph…</div><img id="fImage" alt="North Alabama field identification photograph"></div>
+<div class="caption" id="fCaption">Field photograph selected to reduce memorization of a single image.</div>
+<div class="question">What plant is this?</div><div id="fChoices" class="choices"></div><div id="fFeedback" class="feedback"></div><div id="fInfo" class="info"></div>
+<div class="actions"><button id="fNext" class="primary hidden">Next Question</button><button id="fRestart" class="primary hidden">New Field Quiz</button></div>
+</section>
+
+
+<section id="inat" class="card hidden">
+<h2>My iNaturalist Plants</h2>
+<div class="intro">Sync the unique plant species you have observed on iNaturalist into this app. The species list is stored locally on this device and can be included in your quizzes.</div>
+<div class="controlbar">
+<label>iNaturalist username<input id="inatUsername" class="search" style="margin:4px 0 0" placeholder="Your iNaturalist username" autocomplete="username"></label>
+<label>Import filter<select id="inatQuality"><option value="any">All plant observations</option><option value="research">Research grade only</option></select></label>
+</div>
+<div class="actions"><button id="inatSync" class="primary">Sync My Plants</button><button id="inatClear">Clear Imported Plants</button></div>
+<div id="inatStatus" class="intro" style="margin-top:12px">No iNaturalist account synced yet.</div>
+<div class="stats"><div class="stat"><b id="inatSpeciesCount">0</b><span>Imported taxa</span></div><div class="stat"><b id="inatLastSync">—</b><span>Last sync</span></div><div class="stat"><b id="inatQuizReady">No</b><span>Quiz ready</span></div></div>
+<input id="inatSearch" class="search" placeholder="Search imported plants…">
+<div id="inatGrid" class="grid"></div>
+<div class="small" style="margin-top:10px">This version reads public iNaturalist observation data only. It does not ask for or store your iNaturalist password.</div>
+</section>
+
+<section id="habitat" class="card hidden"><h2>North Alabama Habitats</h2>
+<div class="intro">Study plants by the kind of place where you are likely to encounter them. Habitat tags emphasize the early-successional, woodland, savanna, grassland and pasture contexts important to North Alabama wildlife management.</div>
+<div class="filterrow" id="habitatFilters"></div><div id="habitatGrid" class="grid"></div></section>
+
+<section id="learn" class="card hidden"><h2>Learn the Plants</h2><div class="stats"><div class="stat"><b id="statSeen">0</b><span>Plants practiced</span></div><div class="stat"><b id="statAccuracy">0%</b><span>Overall accuracy</span></div><div class="stat"><b id="statWeak">0</b><span>Needs review</span></div></div><div class="intro">Browse the plants used in the quiz. Focus on field characters such as leaf arrangement, stems, growth habit, rosettes, seedheads and mature plants—not just flowers.</div><div class="actions"><button id="reviewBtn" class="primary">Start Review Quiz</button></div>
+<input id="learnSearch" class="search" placeholder="Search plants…"><div id="plantGrid" class="grid"></div></section>
+<section id="turkey" class="card hidden"><h2>Wild Turkey Plants</h2><div class="intro">Native grasses, forbs and woody plants useful for turkey food, cover and brood habitat.</div><div id="turkeyGrid" class="grid"></div></section>
+<section id="pasture" class="card hidden"><h2>Pasture & Field Plants</h2><div class="intro">Forage grasses, legumes and weeds commonly encountered in North Alabama pastures and hayfields.</div><div id="pastureGrid" class="grid"></div></section>
+<section id="invasive" class="card hidden"><h2>North Alabama Invasives</h2><div class="intro">Important introduced plants to recognize. Invasive status is not the same thing as simply being nonnative.</div><div id="invasiveGrid" class="grid"></div></section>
+</div>
+
+<script>
+/*
+  VERSION: 2026-09-10-all-plants-ecology-v10
+  Major changes:
+  1) Distractors are selected by taxonomy first: same genus, then same family,
+     then similar growth/ecological group, then broader fallback.
+  2) Expanded North Alabama list with conservation-significant native plants.
+  3) Rare/conservation plants are included in the Learn list and are sampled
+     more often in quizzes when good photo candidates are available.
+*/
+
+const PLANTS=[
+{name:"Big bluestem",sci:"Andropogon gerardii",family:"Poaceae",genus:"Andropogon",group:"grass",turkey:true,pasture:true,note:"Native warm-season bunchgrass; valuable for wildlife cover and native forage.",queries:["Andropogon gerardii","big bluestem"]},
+{name:"Broomsedge bluestem",sci:"Andropogon virginicus",family:"Poaceae",genus:"Andropogon",group:"grass",turkey:true,pasture:true,note:"Very common native grass of old fields and disturbed ground.",queries:["Andropogon virginicus","broomsedge bluestem"]},
+{name:"Little bluestem",sci:"Schizachyrium scoparium",family:"Poaceae",genus:"Schizachyrium",group:"grass",turkey:true,pasture:true,note:"Native warm-season bunchgrass common in old fields, glades and open woods.",queries:["Schizachyrium scoparium","little bluestem"]},
+{name:"Indiangrass",sci:"Sorghastrum nutans",family:"Poaceae",genus:"Sorghastrum",group:"grass",turkey:true,pasture:true,note:"Native warm-season grass with open golden seedheads.",queries:["Sorghastrum nutans","Indiangrass"]},
+{name:"Switchgrass",sci:"Panicum virgatum",family:"Poaceae",genus:"Panicum",group:"grass",turkey:true,pasture:true,note:"Native warm-season grass providing nesting and wildlife cover.",queries:["Panicum virgatum","switchgrass"]},
+{name:"Eastern gamagrass",sci:"Tripsacum dactyloides",family:"Poaceae",genus:"Tripsacum",group:"grass",turkey:true,pasture:true,note:"Large native warm-season grass with broad leaves and substantial forage value.",queries:["Tripsacum dactyloides","eastern gamagrass"]},
+{name:"Purpletop",sci:"Tridens flavus",family:"Poaceae",genus:"Tridens",group:"grass",turkey:true,pasture:true,note:"Native warm-season grass recognizable by its airy purplish seedhead.",queries:["Tridens flavus","purpletop grass"]},
+{name:"Tall fescue",sci:"Schedonorus arundinaceus",family:"Poaceae",genus:"Schedonorus",group:"grass",turkey:false,pasture:true,note:"Cool-season perennial grass widely used in Alabama pastures.",queries:["Schedonorus arundinaceus","tall fescue"]},
+{name:"Bahiagrass",sci:"Paspalum notatum",family:"Poaceae",genus:"Paspalum",group:"grass",turkey:false,pasture:true,note:"Warm-season perennial pasture grass common throughout the Southeast.",queries:["Paspalum notatum","bahiagrass"]},
+{name:"Johnsongrass",sci:"Sorghum halepense",family:"Poaceae",genus:"Sorghum",group:"grass",turkey:false,pasture:true,note:"Tall rhizomatous grass that can become troublesome in pastures and hayfields.",queries:["Sorghum halepense","Johnsongrass"]},
+{name:"Foxtail grass",sci:"Setaria",family:"Poaceae",genus:"Setaria",group:"grass",turkey:false,pasture:true,note:"Group of annual grasses frequently encountered in disturbed pastures and hayfields.",queries:["Setaria grass","foxtail grass"]},
+{name:"Common milkweed",sci:"Asclepias syriaca",family:"Apocynaceae",genus:"Asclepias",group:"forb",turkey:true,pasture:false,note:"Native forb and monarch host plant; broad leaves and stout stems are useful field characters.",queries:["Asclepias syriaca","common milkweed"]},
+{name:"Butterfly milkweed",sci:"Asclepias tuberosa",family:"Apocynaceae",genus:"Asclepias",group:"forb",turkey:true,pasture:false,note:"Native dry-site forb with orange flowers; important pollinator plant.",queries:["Asclepias tuberosa","butterfly milkweed"]},
+{name:"Black-eyed Susan",sci:"Rudbeckia hirta",family:"Asteraceae",genus:"Rudbeckia",group:"forb",turkey:true,pasture:false,note:"Native sunny-field forb common in disturbed ground and old fields.",queries:["Rudbeckia hirta","black eyed Susan"]},
+{name:"Partridge pea",sci:"Chamaecrista fasciculata",family:"Fabaceae",genus:"Chamaecrista",group:"forb",turkey:true,pasture:true,note:"Native annual legume used heavily in wildlife habitat plantings.",queries:["Chamaecrista fasciculata","partridge pea"]},
+{name:"White clover",sci:"Trifolium repens",family:"Fabaceae",genus:"Trifolium",group:"legume",turkey:true,pasture:true,note:"Cool-season legume common in lawns and pastures; useful forage under suitable management.",queries:["Trifolium repens","white clover"]},
+{name:"Crimson clover",sci:"Trifolium incarnatum",family:"Fabaceae",genus:"Trifolium",group:"legume",turkey:true,pasture:true,note:"Cool-season annual legume used for forage and wildlife plantings.",queries:["Trifolium incarnatum","crimson clover"]},
+{name:"Chicory",sci:"Cichorium intybus",family:"Asteraceae",genus:"Cichorium",group:"forb",turkey:true,pasture:true,note:"Deep-rooted perennial forb frequently planted or encountered in managed pastures.",queries:["Cichorium intybus","chicory plant"]},
+{name:"Winged sumac",sci:"Rhus copallinum",family:"Anacardiaceae",genus:"Rhus",group:"woody",turkey:true,pasture:false,note:"Native shrub/small tree; fruits and structure can benefit wildlife.",queries:["Rhus copallinum","winged sumac"]},
+{name:"American beautyberry",sci:"Callicarpa americana",family:"Lamiaceae",genus:"Callicarpa",group:"woody",turkey:true,pasture:false,note:"Native shrub with distinctive purple fruit clusters and valuable wildlife cover.",queries:["Callicarpa americana","American beautyberry"]},
+{name:"Common persimmon",sci:"Diospyros virginiana",family:"Ebenaceae",genus:"Diospyros",group:"woody",turkey:true,pasture:false,note:"Native small tree producing fruit used by wildlife.",queries:["Diospyros virginiana","common persimmon"]},
+{name:"Sweetgum",sci:"Liquidambar styraciflua",family:"Altingiaceae",genus:"Liquidambar",group:"woody",turkey:true,pasture:false,note:"Native tree recognizable by star-shaped leaves and corky winged twigs on young growth.",queries:["Liquidambar styraciflua","sweetgum"]},
+{name:"Red maple",sci:"Acer rubrum",family:"Sapindaceae",genus:"Acer",group:"woody",turkey:true,pasture:false,note:"Common native tree of uplands and bottomlands; leaves have three to five lobes.",queries:["Acer rubrum","red maple"]},
+{name:"White oak",sci:"Quercus alba",family:"Fagaceae",genus:"Quercus",group:"woody",turkey:true,pasture:false,note:"Important native oak; rounded leaf lobes and acorns are key field characters.",queries:["Quercus alba","white oak leaf"]},
+{name:"Black oak",sci:"Quercus velutina",family:"Fagaceae",genus:"Quercus",group:"woody",turkey:true,pasture:false,note:"Native upland oak with pointed leaf lobes and wildlife-value acorns.",queries:["Quercus velutina","black oak leaf"]},
+{name:"Pokeweed",sci:"Phytolacca americana",family:"Phytolaccaceae",genus:"Phytolacca",group:"forb",turkey:true,pasture:false,note:"Large native forb with purple-black berries and reddish stems when mature.",queries:["Phytolacca americana","pokeweed"]},
+{name:"Goldenrod",sci:"Solidago",family:"Asteraceae",genus:"Solidago",group:"forb",turkey:true,pasture:false,note:"Group of native perennial forbs important to pollinators and common in fields.",queries:["Solidago goldenrod","goldenrod plant"]},
+{name:"Common yarrow",sci:"Achillea millefolium",family:"Asteraceae",genus:"Achillea",group:"forb",turkey:true,pasture:false,note:"Perennial forb with finely divided leaves and flat-topped flower clusters.",queries:["Achillea millefolium","common yarrow"]},
+{name:"Marestail",sci:"Erigeron canadensis",family:"Asteraceae",genus:"Erigeron",group:"forb",turkey:false,pasture:true,note:"Annual/biennial broadleaf commonly found in disturbed fields and pastures.",queries:["Erigeron canadensis","marestail horseweed"]},
+{name:"Spiny amaranth",sci:"Amaranthus spinosus",family:"Amaranthaceae",genus:"Amaranthus",group:"forb",turkey:false,pasture:true,note:"Prickly annual broadleaf often found in warm-season disturbed ground.",queries:["Amaranthus spinosus","spiny amaranth"]},
+{name:"Bull thistle",sci:"Cirsium vulgare",family:"Asteraceae",genus:"Cirsium",group:"forb",turkey:false,pasture:true,note:"Large prickly thistle with winged stems and spiny leaves.",queries:["Cirsium vulgare","bull thistle"]},
+{name:"Common ragweed",sci:"Ambrosia artemisiifolia",family:"Asteraceae",genus:"Ambrosia",group:"forb",turkey:true,pasture:true,note:"Common annual forb of fields and disturbed ground.",queries:["Ambrosia artemisiifolia","common ragweed"]},
+{name:"Carolina horsenettle",sci:"Solanum carolinense",family:"Solanaceae",genus:"Solanum",group:"forb",turkey:false,pasture:true,note:"Prickly perennial native often treated as a pasture weed.",queries:["Solanum carolinense","Carolina horsenettle"]},
+{name:"Japanese stiltgrass",sci:"Microstegium vimineum",family:"Poaceae",genus:"Microstegium",group:"grass",turkey:false,pasture:false,note:"Invasive annual grass especially common in shaded, disturbed sites.",queries:["Microstegium vimineum","Japanese stiltgrass"]},
+{name:"Crownvetch",sci:"Securigera varia",family:"Fabaceae",genus:"Securigera",group:"legume",turkey:false,pasture:false,note:"Introduced legume that can persist aggressively in some disturbed areas.",queries:["Securigera varia","crownvetch"]},
+{name:"Chinaberry",sci:"Melia azedarach",family:"Meliaceae",genus:"Melia",group:"woody",turkey:false,pasture:false,note:"Introduced tree; compound leaves and clusters of pale fruit help distinguish it.",queries:["Melia azedarach","chinaberry tree"]},
+{name:"Chinese bushclover",sci:"Lespedeza cuneata",family:"Fabaceae",genus:"Lespedeza",group:"legume",turkey:true,pasture:true,note:"Introduced perennial legume common in old fields and roadsides.",queries:["Lespedeza cuneata","Chinese bushclover"]},
+
+/* North Alabama conservation-significant additions */
+{name:"Morefield's leatherflower",sci:"Clematis morefieldii",family:"Ranunculaceae",genus:"Clematis",group:"vine",turkey:false,pasture:false,rare:true,status:"Federally endangered; rare North Alabama endemic",note:"Extremely rare limestone-slope vine found in the Huntsville Mountains. Learn to recognize the vegetative vine and distinctive leathery flowers.",queries:["Clematis morefieldii","Morefield's leatherflower"]},
+{name:"Alabama larkspur",sci:"Delphinium alabamicum",family:"Ranunculaceae",genus:"Delphinium",group:"forb",turkey:false,pasture:false,rare:true,status:"Alabama conservation species",note:"Rare Alabama larkspur associated with specialized habitats. A useful high-value identification target.",queries:["Delphinium alabamicum","Alabama larkspur"]},
+{name:"Small-head gayfeather",sci:"Liatris microcephala",family:"Asteraceae",genus:"Liatris",group:"forb",turkey:true,pasture:false,rare:true,status:"Conservation-significant native",note:"Small-headed blazing star of Cumberland Plateau and other open rocky habitats.",queries:["Liatris microcephala","small headed gayfeather"]},
+{name:"Pretty coreopsis",sci:"Coreopsis pulchra",family:"Asteraceae",genus:"Coreopsis",group:"forb",turkey:true,pasture:false,rare:true,status:"Conservation-significant native",note:"Specialized native coreopsis associated with rocky/glade habitats.",queries:["Coreopsis pulchra","pretty coreopsis"]},
+{name:"Cumberland rosinweed",sci:"Silphium terebinthinaceum",family:"Asteraceae",genus:"Silphium",group:"forb",turkey:true,pasture:false,rare:true,status:"Conservation-significant native",note:"Large native prairie/glade forb of the Cumberland region; useful for learning large composite leaves and flower heads.",queries:["Silphium terebinthinaceum","Cumberland rosinweed"]},
+{name:"Gattinger's prairie clover",sci:"Dalea gattingeri",family:"Fabaceae",genus:"Dalea",group:"legume",turkey:true,pasture:false,rare:true,status:"Conservation-significant native",note:"Specialized native prairie-clover of open rocky habitats.",queries:["Dalea gattingeri","Gattinger's prairie clover"]},
+{name:"Little-leaved alumroot",sci:"Heuchera parviflora var. puberulenta",family:"Saxifragaceae",genus:"Heuchera",group:"forb",turkey:false,pasture:false,rare:true,status:"Conservation-significant native",note:"Small native alumroot associated with rocky habitats.",queries:["Heuchera parviflora puberulenta","little leaved alumroot"]},
+{name:"American ginseng",sci:"Panax quinquefolius",family:"Araliaceae",genus:"Panax",group:"forb",turkey:false,pasture:false,rare:true,status:"Conservation-significant native",note:"Long-lived woodland herb; recognize the palmately compound leaves and growth habit.",queries:["Panax quinquefolius","American ginseng"]},
+{name:"Large whorled pogonia",sci:"Isotria verticillata",family:"Orchidaceae",genus:"Isotria",group:"orchid",turkey:false,pasture:false,rare:true,status:"Conservation-significant native",note:"Uncommon woodland orchid with a distinctive whorl of leaves.",queries:["Isotria verticillata","large whorled pogonia"]},
+{name:"Rock clubmoss",sci:"Huperzia porophila",family:"Lycopodiaceae",genus:"Huperzia",group:"fern ally",turkey:false,pasture:false,rare:true,status:"Conservation-significant native",note:"Rock-dwelling evergreen clubmoss of shaded cliffs and rocky habitats.",queries:["Huperzia porophila","rock clubmoss"]},
+{name:"Limerock arrowwood",sci:"Viburnum bracteatum",family:"Adoxaceae",genus:"Viburnum",group:"woody",turkey:true,pasture:false,rare:true,status:"Alabama S1/G1 conservation species",note:"Rare limestone-associated shrub of northeastern Alabama; opposite leaves and branched flower clusters are useful characters.",queries:["Viburnum bracteatum","limerock arrowwood"]},
+{name:"Little sweet Betsy",sci:"Trillium cuneatum",family:"Melanthiaceae",genus:"Trillium",group:"forb",turkey:false,pasture:false,rare:true,status:"Conservation-significant woodland native",note:"Spring woodland trillium with three leaves and a single flower; wild populations deserve protection.",queries:["Trillium cuneatum","little sweet Betsy"]},
+{name:"Twisted trillium",sci:"Trillium stamineum",family:"Melanthiaceae",genus:"Trillium",group:"forb",turkey:false,pasture:false,rare:true,status:"Conservation-significant woodland native",note:"Trillium with characteristically twisted petals; associated with rich woodland and alkaline sites.",queries:["Trillium stamineum","twisted trillium"]},
+{name:"Yellow trillium",sci:"Trillium luteum",family:"Melanthiaceae",genus:"Trillium",group:"forb",turkey:false,pasture:false,rare:true,status:"Uncommon Alabama woodland native",note:"Yellow-flowered trillium of rich shaded habitats; useful comparison with other Trillium species.",queries:["Trillium luteum","yellow trillium"]},
+{name:"Culver's root",sci:"Veronicastrum virginicum",family:"Plantaginaceae",genus:"Veronicastrum",group:"forb",turkey:true,pasture:false,rare:true,status:"Very few remaining wild populations in Alabama",note:"Tall native meadow/woodland forb with opposite leaves and a distinctive flowering raceme.",queries:["Veronicastrum virginicum","Culver's root"]},
+{name:"Post oak",sci:"Quercus stellata",family:"Fagaceae",genus:"Quercus",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native upland oak with distinctive cross-shaped leaves and valuable acorns.",queries:["Quercus stellata","post oak"]},
+{name:"Southern red oak",sci:"Quercus falcata",family:"Fagaceae",genus:"Quercus",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Common upland oak with variable lobed leaves and acorns.",queries:["Quercus falcata","southern red oak"]},
+{name:"Chestnut oak",sci:"Quercus montana",family:"Fagaceae",genus:"Quercus",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Oak of acidic uplands and rocky slopes; leaves have rounded teeth rather than deep lobes.",queries:["Quercus montana","chestnut oak"]},
+{name:"Mockernut hickory",sci:"Carya tomentosa",family:"Juglandaceae",genus:"Carya",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native hickory with compound leaves and thick-shelled nuts.",queries:["Carya tomentosa","mockernut hickory"]},
+{name:"Shagbark hickory",sci:"Carya ovata",family:"Juglandaceae",genus:"Carya",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Large native hickory recognized by shaggy exfoliating bark and compound leaves.",queries:["Carya ovata","shagbark hickory"]},
+{name:"Shortleaf pine",sci:"Pinus echinata",family:"Pinaceae",genus:"Pinus",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native pine of uplands and open woodlands; important in southern pine and savanna systems.",queries:["Pinus echinata","shortleaf pine"]},
+{name:"Virginia pine",sci:"Pinus virginiana",family:"Pinaceae",genus:"Pinus",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Small native pine common on dry, disturbed and early-successional sites.",queries:["Pinus virginiana","Virginia pine"]},
+{name:"Eastern redcedar",sci:"Juniperus virginiana",family:"Cupressaceae",genus:"Juniperus",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native evergreen that readily colonizes old fields and disturbed ground.",queries:["Juniperus virginiana","eastern redcedar"]},
+{name:"Flowering dogwood",sci:"Cornus florida",family:"Cornaceae",genus:"Cornus",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native understory tree with opposite leaves, showy bracts and red fruit.",queries:["Cornus florida","flowering dogwood"]},
+{name:"Common pawpaw",sci:"Asimina triloba",family:"Annonaceae",genus:"Asimina",group:"woody",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native understory tree with very large simple leaves and edible fruit.",queries:["Asimina triloba","pawpaw tree"]},
+{name:"Blackberry",sci:"Rubus allegheniensis",family:"Rosaceae",genus:"Rubus",group:"shrub",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native bramble providing fruit and cover; identification often relies on leaves, canes and thorns.",queries:["Rubus allegheniensis","blackberry plant"]},
+{name:"Dewberry",sci:"Rubus trivialis",family:"Rosaceae",genus:"Rubus",group:"vine",turkey:true,pasture:false,native:true,northAlabama:true,note:"Low-growing native bramble common in fields and edges.",queries:["Rubus trivialis","dewberry plant"]},
+{name:"Common sunflower",sci:"Helianthus annuus",family:"Asteraceae",genus:"Helianthus",group:"forb",turkey:true,pasture:false,native:true,northAlabama:true,note:"Tall annual native forb of disturbed fields; seedheads are valuable wildlife food.",queries:["Helianthus annuus","common sunflower"]},
+{name:"Maximilian sunflower",sci:"Helianthus maximiliani",family:"Asteraceae",genus:"Helianthus",group:"forb",turkey:true,pasture:false,native:true,northAlabama:true,note:"Tall perennial sunflower useful for recognizing native early-successional forb structure.",queries:["Helianthus maximiliani","Maximilian sunflower"]},
+{name:"Ironweed",sci:"Vernonia gigantea",family:"Asteraceae",genus:"Vernonia",group:"forb",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native perennial forb of moist fields and openings with vivid purple flower heads.",queries:["Vernonia gigantea","ironweed"]},
+{name:"Joe-Pye weed",sci:"Eutrochium purpureum",family:"Asteraceae",genus:"Eutrochium",group:"forb",turkey:true,pasture:false,native:true,northAlabama:true,note:"Tall native perennial of moist openings and edges.",queries:["Eutrochium purpureum","Joe Pye weed"]},
+{name:"Bee balm",sci:"Monarda fistulosa",family:"Lamiaceae",genus:"Monarda",group:"forb",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native aromatic forb of openings and dry to mesic sites; square stems help identify the mint family.",queries:["Monarda fistulosa","wild bergamot"]},
+{name:"Spotted beebalm",sci:"Monarda punctata",family:"Lamiaceae",genus:"Monarda",group:"forb",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native dry-site mint with distinctive layered flower heads and bracts.",queries:["Monarda punctata","spotted beebalm"]},
+{name:"Mountain mint",sci:"Pycnanthemum tenuifolium",family:"Lamiaceae",genus:"Pycnanthemum",group:"forb",turkey:true,pasture:false,native:true,northAlabama:true,note:"Native aromatic perennial common in open habitats; narrow leaves and mint-family stems are useful clues.",queries:["Pycnanthemum tenuifolium","mountain mint"]},
+{name:"Curly dock",sci:"Rumex crispus",family:"Polygonaceae",genus:"Rumex",group:"forb",turkey:false,pasture:true,native:false,northAlabama:true,note:"Common pasture and disturbed-ground weed with strongly wavy mature leaves.",queries:["Rumex crispus","curly dock"]},
+{name:"Broadleaf plantain",sci:"Plantago major",family:"Plantaginaceae",genus:"Plantago",group:"forb",turkey:false,pasture:true,native:false,northAlabama:true,note:"Low rosette-forming weed common in compacted soils, lawns and pastures.",queries:["Plantago major","broadleaf plantain"]},
+{name:"Common chickweed",sci:"Stellaria media",family:"Caryophyllaceae",genus:"Stellaria",group:"forb",turkey:false,pasture:true,native:false,northAlabama:true,note:"Low cool-season annual common in moist disturbed ground and pastures.",queries:["Stellaria media","common chickweed"]},
+{name:"Henbit",sci:"Lamium amplexicaule",family:"Lamiaceae",genus:"Lamium",group:"forb",turkey:false,pasture:true,native:false,northAlabama:true,note:"Cool-season pasture and lawn weed with square stems and distinctive upper leaves.",queries:["Lamium amplexicaule","henbit"]},
+{name:"Common buttercup",sci:"Ranunculus fascicularis",family:"Ranunculaceae",genus:"Ranunculus",group:"forb",turkey:false,pasture:true,native:true,northAlabama:true,note:"Native buttercup encountered in fields and pastures; basal leaves and yellow flowers are useful clues.",queries:["Ranunculus fascicularis","buttercup"]},
+{name:"Bermudagrass",sci:"Cynodon dactylon",family:"Poaceae",genus:"Cynodon",group:"grass",turkey:false,pasture:true,native:false,northAlabama:true,note:"Warm-season stoloniferous/rhizomatous grass widely used in southern pastures and hayfields.",queries:["Cynodon dactylon","bermudagrass"]},
+{name:"Dallisgrass",sci:"Paspalum dilatatum",family:"Poaceae",genus:"Paspalum",group:"grass",turkey:false,pasture:true,native:false,northAlabama:true,note:"Perennial pasture grass with distinctive racemes; common in warm-season fields.",queries:["Paspalum dilatatum","dallisgrass"]},
+{name:"Crabgrass",sci:"Digitaria sanguinalis",family:"Poaceae",genus:"Digitaria",group:"grass",turkey:false,pasture:true,native:false,northAlabama:true,note:"Annual warm-season grass common in disturbed soils and pastures.",queries:["Digitaria sanguinalis","crabgrass"]},
+{name:"Orchardgrass",sci:"Dactylis glomerata",family:"Poaceae",genus:"Dactylis",group:"grass",turkey:false,pasture:true,native:false,northAlabama:true,note:"Introduced cool-season forage grass; dense growth can affect wildlife habitat in old fields.",queries:["Dactylis glomerata","orchardgrass"]},
+{name:"Annual ryegrass",sci:"Lolium multiflorum",family:"Poaceae",genus:"Lolium",group:"grass",turkey:false,pasture:true,native:false,northAlabama:true,note:"Cool-season annual or short-lived grass commonly used in southern overseeding and forage systems.",queries:["Lolium multiflorum","annual ryegrass"]},
+{name:"Kudzu",sci:"Pueraria montana var. lobata",family:"Fabaceae",genus:"Pueraria",group:"vine",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Aggressive invasive vine capable of covering trees and large areas.",queries:["Pueraria montana lobata","kudzu"]},
+{name:"Chinese privet",sci:"Ligustrum sinense",family:"Oleaceae",genus:"Ligustrum",group:"woody",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Highly common invasive shrub forming dense thickets in woodlands and edges.",queries:["Ligustrum sinense","Chinese privet"]},
+{name:"Japanese honeysuckle",sci:"Lonicera japonica",family:"Caprifoliaceae",genus:"Lonicera",group:"vine",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Invasive twining vine common along forest edges and disturbed areas.",queries:["Lonicera japonica","Japanese honeysuckle"]},
+{name:"Callery pear",sci:"Pyrus calleryana",family:"Rosaceae",genus:"Pyrus",group:"woody",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Invasive ornamental tree that readily escapes into fields, edges and forests.",queries:["Pyrus calleryana","Callery pear"]},
+{name:"Nandina",sci:"Nandina domestica",family:"Berberidaceae",genus:"Nandina",group:"woody",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Introduced evergreen shrub that can spread from landscaping into natural areas.",queries:["Nandina domestica","nandina"]},
+{name:"English ivy",sci:"Hedera helix",family:"Araliaceae",genus:"Hedera",group:"vine",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Invasive evergreen vine forming dense mats and climbing trees.",queries:["Hedera helix","English ivy"]},
+{name:"Garlic mustard",sci:"Alliaria petiolata",family:"Brassicaceae",genus:"Alliaria",group:"forb",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Cool-season invasive woodland forb recognizable by garlic odor when crushed.",queries:["Alliaria petiolata","garlic mustard"]},
+{name:"Cogongrass",sci:"Imperata cylindrica",family:"Poaceae",genus:"Imperata",group:"grass",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Highly invasive perennial grass; dense stands and white fluffy seedheads are distinctive.",queries:["Imperata cylindrica","cogongrass"]},
+{name:"Tree-of-heaven",sci:"Ailanthus altissima",family:"Simaroubaceae",genus:"Ailanthus",group:"woody",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Fast-growing invasive tree with large pinnately compound leaves and unpleasant odor when crushed.",queries:["Ailanthus altissima","tree of heaven"]},
+{name:"Mimosa",sci:"Albizia julibrissin",family:"Fabaceae",genus:"Albizia",group:"woody",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Introduced tree that escapes along roadsides, fields and disturbed sites.",queries:["Albizia julibrissin","mimosa tree"]},
+{name:"Japanese climbing fern",sci:"Lygodium japonicum",family:"Lygodiaceae",genus:"Lygodium",group:"fern",turkey:false,pasture:false,invasive:true,northAlabama:true,note:"Climbing invasive fern that can form dense mats over shrubs and groundcover.",queries:["Lygodium japonicum","Japanese climbing fern"]}];
+
+
+const BASE_PLANT_COUNT=PLANTS.length;
+const INAT_STORE_KEY="naPlantINaturalist_v1";
+const INAT_USER_KEY="naPlantINaturalistUser_v1";
+const INAT_SYNC_KEY="naPlantINaturalistSync_v1";
+let INAT_PLANTS=[];
+
+function validTaxonomyValue(v){
+  return !!v && !/^(?:unknown|iNaturalist import|imported|plant|plantae)$/i.test(String(v).trim());
+}
+function inferPlantGroup(t,family){
+  const text=[t&&t.rank,t&&t.iconic_taxon_name,t&&t.name,family].filter(Boolean).join(" ").toLowerCase();
+  if(/poaceae|cyperaceae|juncaceae/.test(text))return "grass";
+  if(/fabaceae/.test(text))return "legume";
+  if(/orchidaceae/.test(text))return "orchid";
+  if(/fern|polypod|pterid|lycopod|selaginell/.test(text))return "fern";
+  if(/bignoniaceae|vitaceae|convolvulaceae|cucurbitaceae/.test(text))return "vine";
+  return "forb";
+}
+function normalizeInatTaxon(t){
+  const sci=t.name||t.scientific_name||"";
+  const common=t.preferred_common_name||t.english_common_name||sci;
+  const ancestors=Array.isArray(t.ancestors)?t.ancestors:[];
+  const fam=ancestors.find(a=>a.rank==="family");
+  const gen=ancestors.find(a=>a.rank==="genus");
+  const family=(fam&&fam.name)||"";
+  const genus=(gen&&gen.name)||((t.rank==="species"||t.rank==="subspecies"||t.rank==="variety")?sci.split(" ")[0]:"");
+  return {
+    name:common||sci, sci, family, genus, group:inferPlantGroup(t,family), turkey:false, pasture:false, invasive:false, northAlabama:true,
+    note:"", habitats:["my-property"], difficulty:"medium", inaturalist:true, inatTaxonId:t.id||null,
+    wikipediaUrl:t.wikipedia_url||"", guideId:"", guideEcology:"",
+    queries:[sci,common].filter(Boolean)
+  };
+}
+function loadInatPlants(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(INAT_STORE_KEY)||"[]");
+    INAT_PLANTS=raw.filter(x=>x&&x.sci);
+  }catch(e){INAT_PLANTS=[]}
+  rebuildPlantPool();
+}
+function rebuildPlantPool(){
+  PLANTS.splice(BASE_PLANT_COUNT);
+  const existing=new Set(PLANTS.map(p=>p.sci.toLowerCase()));
+  for(const p of INAT_PLANTS){if(p.sci&&!existing.has(p.sci.toLowerCase())){PLANTS.push(p);existing.add(p.sci.toLowerCase())}}
+  enrichPlants();
+}
+function inatPool(){return PLANTS.filter(p=>p.inaturalist)}
+function selectedQuizPool(){
+  const mode=$("quizPool")?.value||state.pool||"all";
+  state.pool=mode;
+  if(mode==="regional")return PLANTS.filter(p=>!p.inaturalist);
+  if(mode==="inat")return inatPool();
+  return PLANTS;
+}
+async function fetchInatSpecies(username,quality){
+  const all=[]; let page=1,total=Infinity;
+  while(all.length<total && page<=20){
+    const u=new URL("https://api.inaturalist.org/v1/observations/species_counts");
+    u.searchParams.set("user_id",username);u.searchParams.set("iconic_taxa","Plantae");u.searchParams.set("hrank","species");u.searchParams.set("per_page","500");u.searchParams.set("page",String(page));u.searchParams.set("verifiable","any");
+    if(quality==="research")u.searchParams.set("quality_grade","research");
+    const d=await jsonFetch(u.toString(),12000);
+    total=Number(d.total_results||0);
+    const rows=Array.isArray(d.results)?d.results:[];
+    for(const row of rows){if(row&&row.taxon&&row.taxon.name)all.push(row.taxon)}
+    if(!rows.length)break; page++;
+    if(all.length<total)await new Promise(r=>setTimeout(r,1050));
+  }
+  const uniq=new Map();for(const t of all)uniq.set(t.id||t.name,t);
+  return [...uniq.values()];
+}
+
+async function fetchInatTaxonDetail(id){
+  if(!id)return null;
+  try{
+    const d=await jsonFetch("https://api.inaturalist.org/v1/taxa/"+encodeURIComponent(id),7000);
+    return d&&Array.isArray(d.results)?d.results[0]||null:null;
+  }catch(e){return null}
+}
+async function fetchGBIFTaxonomy(name){
+  try{
+    const d=await jsonFetch("https://api.gbif.org/v1/species/match?name="+encodeURIComponent(name),6500);
+    return d||null;
+  }catch(e){return null}
+}
+async function enrichImportedTaxon(p){
+  if(!p||!p.inaturalist)return p;
+  if(validTaxonomyValue(p.family)&&validTaxonomyValue(p.genus))return p;
+  const detail=await fetchInatTaxonDetail(p.inatTaxonId);
+  if(detail){
+    const ancestors=Array.isArray(detail.ancestors)?detail.ancestors:[];
+    const fam=ancestors.find(a=>a.rank==="family");
+    const gen=ancestors.find(a=>a.rank==="genus");
+    if(fam&&fam.name)p.family=fam.name;
+    if(gen&&gen.name)p.genus=gen.name;
+    if(detail.wikipedia_url)p.wikipediaUrl=detail.wikipedia_url;
+    p.group=inferPlantGroup(detail,p.family);
+  }
+  if(!validTaxonomyValue(p.family)||!validTaxonomyValue(p.genus)){
+    const g=await fetchGBIFTaxonomy(p.sci);
+    if(g){
+      if(validTaxonomyValue(g.family))p.family=g.family;
+      if(validTaxonomyValue(g.genus))p.genus=g.genus;
+    }
+  }
+  if(!validTaxonomyValue(p.family))p.family="";
+  if(!validTaxonomyValue(p.genus))p.genus=(p.sci||"").split(" ")[0]||"";
+  p.group=inferPlantGroup(p,p.family);
+  return p;
+}
+async function enrichImportedTaxa(list,onProgress){
+  const plants=(list||[]).filter(p=>p&&p.inaturalist);
+  let done=0;
+  for(let i=0;i<plants.length;i+=6){
+    await Promise.all(plants.slice(i,i+6).map(async p=>{await enrichImportedTaxon(p);done++;if(onProgress)onProgress(done,plants.length)}));
+  }
+  try{localStorage.setItem(INAT_STORE_KEY,JSON.stringify(INAT_PLANTS))}catch(e){}
+  rebuildPlantPool();
+}
+async function syncINaturalist(){
+  const username=$("inatUsername").value.trim();
+  if(!username){$("inatStatus").textContent="Enter your iNaturalist username first.";return}
+  const btn=$("inatSync");btn.disabled=true;$("inatStatus").textContent="Syncing your unique plant species from iNaturalist…";
+  try{
+    const taxa=await fetchInatSpecies(username,$("inatQuality").value);
+    if(!taxa.length)throw new Error("No plant species were found for that username and filter.");
+    INAT_PLANTS=taxa.map(normalizeInatTaxon).filter(p=>p.sci);
+    $("inatStatus").textContent=`Found ${INAT_PLANTS.length} plant taxa. Adding family/genus metadata…`;
+    await enrichImportedTaxa(INAT_PLANTS,(done,total)=>{if(done===total||done%12===0)$("inatStatus").textContent=`Adding botanical metadata… ${done}/${total}`});
+    localStorage.setItem(INAT_STORE_KEY,JSON.stringify(INAT_PLANTS));
+    localStorage.setItem(INAT_USER_KEY,username);localStorage.setItem(INAT_SYNC_KEY,new Date().toISOString());
+    rebuildPlantPool();renderInatPanel();
+    $("inatStatus").textContent=`Synced ${INAT_PLANTS.length} plant taxa from @${username}, including botanical family/genus metadata.`;
+  }catch(e){$("inatStatus").textContent="Sync failed: "+(e&&e.message?e.message:"Unable to reach iNaturalist.")}finally{btn.disabled=false}
+}
+function renderInatPanel(){
+  const user=localStorage.getItem(INAT_USER_KEY)||"";if($("inatUsername")&&!$("inatUsername").value)$("inatUsername").value=user;
+  if($("inatSpeciesCount"))$("inatSpeciesCount").textContent=INAT_PLANTS.length;
+  const stamp=localStorage.getItem(INAT_SYNC_KEY);if($("inatLastSync"))$("inatLastSync").textContent=stamp?new Date(stamp).toLocaleDateString():"—";
+  if($("inatQuizReady"))$("inatQuizReady").textContent=INAT_PLANTS.length>=4?"Yes":"No";
+  const q=($("inatSearch")?.value||"").toLowerCase();
+  if($("inatGrid"))renderList("inatGrid",INAT_PLANTS.filter(p=>(p.name+" "+p.sci).toLowerCase().includes(q)));
+  if(user&&INAT_PLANTS.length&&$("inatStatus")&&!$("inatStatus").textContent.startsWith("Synced"))$("inatStatus").textContent=`${INAT_PLANTS.length} plant taxa saved from @${user}.`;
+}
+function clearINaturalist(){
+  INAT_PLANTS=[];localStorage.removeItem(INAT_STORE_KEY);localStorage.removeItem(INAT_SYNC_KEY);rebuildPlantPool();renderInatPanel();
+  $("inatStatus").textContent="Imported iNaturalist plants cleared from this device.";
+}
+
+
+/* PHOTO SOURCE POLICY */
+// PHOTO ENGINE — FIELD-PHOTO-5 SAFE MERGE
+const TRUSTED=/\b(USDA|NRCS|ARS|USGS|Smithsonian|University|Universit|Auburn|Alabama|Missouri Botanical|Kew|Cornell|Duke|Florida Museum|Georgia Southern|Georgia College|Tennessee|North Carolina|Virginia Tech|Purdue|Iowa State|Ohio State|Penn State|Michigan State|University of Georgia|University of Florida|University of Tennessee|University of Alabama|Samford|National Herbarium|State Museum|Botanical Garden|Botanic Garden|Natural History|Extension|Forest Service|USFS)\b/i;
+const EXCLUDE=/(alamy|shutterstock|gettyimages|istockphoto|depositphotos|dreamstime|123rf)/i;
+const SPECIMEN=/(herbarium|herbaria|specimen|voucher|pressed|mounted|exsiccat|collection sheet|plant collection|sheet specimen)/i;
+const GRAPHIC=/(illustration|illustrated|drawing|diagram|poster|plate|field guide|identification guide|id guide|fact sheet|factsheet|presentation|powerpoint|slide deck|collage|composite|chart|map|logo|icon|labelled|labeled|with label|name label|captioned|text overlay|watermark)/i;
+
+function textOf(rec,m){
+  return [rec.datasetName,rec.institutionCode,rec.publisher,rec.collectionCode,rec.references,
+    rec.identifiedBy,rec.locality,rec.stateProvince,rec.occurrenceRemarks,rec.eventRemarks,
+    rec.habitat,rec.lifeStage,m&&m.identifier,m&&m.title,m&&m.description,m&&m.references,
+    m&&m.creator,m&&m.license,m&&m.rightsHolder].filter(Boolean).join(' ');
+}
+
+async function jsonFetch(url,timeout=9000){
+  const ctl=new AbortController();
+  const timer=setTimeout(()=>ctl.abort(),timeout);
+  try{
+    const r=await fetch(url,{signal:ctl.signal,cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    return await r.json();
+  }finally{clearTimeout(timer)}
+}
+
+async function resolveTaxon(name){
+  try{
+    const d=await jsonFetch('https://api.gbif.org/v1/species/match?name='+encodeURIComponent(name));
+    if(d&&d.usageKey)return d.usageKey;
+  }catch(e){}
+  return null;
+}
+
+async function fetchRecordsFor(name,scope){
+  const params=new URLSearchParams({
+    mediaType:'StillImage',
+    limit:'80',
+    occurrenceStatus:'PRESENT'
+  });
+  if(scope==='alabama'){params.set('country','US');params.set('stateProvince','Alabama')}
+  else if(scope==='us'){params.set('country','US')}
+
+  const key=await resolveTaxon(name);
+  if(key)params.set('taxonKey',key);
+  else params.set('scientificName',name);
+
+  try{
+    const d=await jsonFetch('https://api.gbif.org/v1/occurrence/search?'+params.toString(),10000);
+    return d.results||[];
+  }catch(e){return []}
+}
+
+function scoreRecord(rec,m,scope){
+  const text=textOf(rec,m);
+  if(EXCLUDE.test(text)||SPECIMEN.test(text)||GRAPHIC.test(text))return -100000;
+  if(!m || (m.type && !/StillImage/i.test(m.type)))return -100000;
+
+  let s=0;
+  if(scope==='alabama')s+=700;
+  else if(scope==='us')s+=400;
+  else s+=100;
+
+  if(TRUSTED.test(text))s+=500;
+  if(rec.identifiedBy)s+=60;
+  if(rec.institutionCode)s+=35;
+  if(rec.datasetName)s+=20;
+  if(rec.publisher)s+=15;
+  if(rec.habitat||rec.locality)s+=10;
+
+  const title=(m.title||'')+' '+(m.description||'');
+  if(/\b(field|wild|habitat|flower|leaf|leaves|plant|grass|tree|shrub|forb|observation)\b/i.test(title))s+=25;
+  if(/\b(inaturalist|observation\.org)\b/i.test(text))s+=10;
+
+  return s;
+}
+
+function md5(str){
+  function cmn(q,a,b,x,s,t){return add(rol(add(add(a,q),add(x,t)),s),b)}
+  function ff(a,b,c,d,x,s,t){return cmn((b&c)|((~b)&d),a,b,x,s,t)}
+  function gg(a,b,c,d,x,s,t){return cmn((b&d)|(c&(~d)),a,b,x,s,t)}
+  function hh(a,b,c,d,x,s,t){return cmn(b^c^d,a,b,x,s,t)}
+  function ii(a,b,c,d,x,s,t){return cmn(c^(b|(~d)),a,b,x,s,t)}
+  function add(){let r=0;for(let i=0;i<arguments.length;i++)r=(r+arguments[i])|0;return r}
+  function rol(n,c){return(n<<c)|(n>>>(32-c))}
+  let bytes=unescape(encodeURIComponent(str)),l=bytes.length,blocks=((l+8>>6)+1)*16,x=new Array(blocks).fill(0);
+  for(let i=0;i<l;i++)x[i>>2]|=bytes.charCodeAt(i)<<(8*(i%4));
+  x[l>>2]|=128<<(8*(l%4));x[blocks-2]=l*8;
+  let a=1732584193,b=-271733879,c=-1732584194,d=271733878;
+  for(let i=0;i<blocks;i+=16){
+    let oa=a,ob=b,oc=c,od=d;
+    a=ff(a,b,c,d,x[i],7,-680876936);d=ff(d,a,b,c,x[i+1],12,-389564586);c=ff(c,d,a,b,x[i+2],17,606105819);b=ff(b,c,d,a,x[i+3],22,-1044525331);
+    a=ff(a,b,c,d,x[i+4],7,-176418897);d=ff(d,a,b,c,x[i+5],12,1200080426);c=ff(c,d,a,b,x[i+6],17,-1473231341);b=ff(b,c,d,a,x[i+7],22,-45705983);
+    a=ff(a,b,c,d,x[i+8],7,1770035416);d=ff(d,a,b,c,x[i+9],12,-1958414417);c=ff(c,d,a,b,x[i+10],17,-42063);b=ff(b,c,d,a,x[i+11],22,-1990404162);
+    a=ff(a,b,c,d,x[i+12],7,1804603682);d=ff(d,a,b,c,x[i+13],12,-40341101);c=ff(c,d,a,b,x[i+14],17,-1502002290);b=ff(b,c,d,a,x[i+15],22,1236535329);
+    a=gg(a,b,c,d,x[i+1],5,-165796510);d=gg(d,a,b,c,x[i+6],9,-1069501632);c=gg(c,d,a,b,x[i+11],14,643717713);b=gg(b,c,d,a,x[i],20,-373897302);
+    a=gg(a,b,c,d,x[i+5],5,-701558691);d=gg(d,a,b,c,x[i+10],9,38016083);c=gg(c,d,a,b,x[i+15],14,-660478335);b=gg(b,c,d,a,x[i+4],20,-405537848);
+    a=gg(a,b,c,d,x[i+9],5,568446438);d=gg(d,a,b,c,x[i+14],9,-1019803690);c=gg(c,d,a,b,x[i+3],14,-187363961);b=gg(b,c,d,a,x[i+8],20,1163531501);
+    a=gg(a,b,c,d,x[i+13],5,-1444681467);d=gg(d,a,b,c,x[i+2],9,-51403784);c=gg(c,d,a,b,x[i+7],14,1735328473);b=gg(b,c,d,a,x[i+12],20,-1926607734);
+    a=hh(a,b,c,d,x[i+5],4,-378558);d=hh(d,a,b,c,x[i+8],11,-2022574463);c=hh(c,d,a,b,x[i+11],16,1839030562);b=hh(b,c,d,a,x[i+14],23,-35309556);
+    a=hh(a,b,c,d,x[i+1],4,-1530992060);d=hh(d,a,b,c,x[i+4],11,1272893353);c=hh(c,d,a,b,x[i+7],16,-155497632);b=hh(b,c,d,a,x[i+10],23,-1094730640);
+    a=hh(a,b,c,d,x[i+13],4,681279174);d=hh(d,a,b,c,x[i],11,-358537222);c=hh(c,d,a,b,x[i+3],16,-722521979);b=hh(b,c,d,a,x[i+6],23,76029189);
+    a=hh(a,b,c,d,x[i+9],4,-640364487);d=hh(d,a,b,c,x[i+12],11,-421815835);c=hh(c,d,a,b,x[i+15],16,530742520);b=hh(b,c,d,a,x[i+2],23,-995338651);
+    a=ii(a,b,c,d,x[i],6,-198630844);d=ii(d,a,b,c,x[i+7],10,1126891415);c=ii(c,d,a,b,x[i+14],15,-1416354905);b=ii(b,c,d,a,x[i+5],21,-57434055);
+    a=ii(a,b,c,d,x[i+12],6,1700485571);d=ii(d,a,b,c,x[i+3],10,-1894986606);c=ii(c,d,a,b,x[i+10],15,-1051523);b=ii(b,c,d,a,x[i+1],21,-2054922799);
+    a=ii(a,b,c,d,x[i+8],6,1873313359);d=ii(d,a,b,c,x[i+15],10,-30611744);c=ii(c,d,a,b,x[i+6],15,-1560198380);b=ii(b,c,d,a,x[i+13],21,1309151649);
+    a=ii(a,b,c,d,x[i+4],6,-145523070);d=ii(d,a,b,c,x[i+11],10,-1120210379);c=ii(c,d,a,b,x[i+2],15,718787259);b=ii(b,c,d,a,x[i+9],21,-343485551);
+    a=add(a,oa);b=add(b,ob);c=add(c,oc);d=add(d,od);
+  }
+  return[a,b,c,d].map(n=>[0,1,2,3].map(i=>("0"+((n>>(8*i))&255).toString(16)).slice(-2)).join('')).join('');
+}
+
+const PHOTO_CACHE_KEY='naPlantPhotoCandidates_v7';
+const BAD_PHOTO_KEY='naPlantBadPhotoURLs_v1';
+const photoMemory=new Map();
+
+async function fetchImages(plant,forceRefresh=false){
+  const cacheKey=plant.sci;
+  if(forceRefresh)photoMemory.delete(cacheKey);
+  if(!forceRefresh && photoMemory.has(cacheKey))return photoMemory.get(cacheKey);
+
+  if(!forceRefresh){
+    try{
+      const saved=JSON.parse(localStorage.getItem(PHOTO_CACHE_KEY)||'{}');
+      if(Array.isArray(saved[cacheKey])&&saved[cacheKey].length){
+        photoMemory.set(cacheKey,saved[cacheKey]);
+        return saved[cacheKey];
+      }
+    }catch(e){}
+  }
+
+  const candidates=[],seen=new Set();
+
+  // 1) PREFERRED SOURCE: iNaturalist Research Grade observations.
+  // Alabama is queried first. If there are not enough candidates, a broader
+  // Research Grade search is added. GBIF remains the fallback.
+  async function fetchINatResearchGrade(alabamaOnly){
+    const params=new URLSearchParams({
+      quality_grade:'research',
+      photos:'true',
+      iconic_taxa:'Plantae',
+      per_page:'30',
+      order:'desc',
+      order_by:'votes'
+    });
+
+    if(plant.inatTaxonId)params.set('taxon_id',plant.inatTaxonId);
+    else params.set('taxon_name',plant.sci);
+
+    if(alabamaOnly){
+      // Approximate Alabama bounding box.
+      params.set('nelat','35.008');
+      params.set('nelng','-84.889');
+      params.set('swlat','30.194');
+      params.set('swlng','-88.473');
+    }
+
+    try{
+      const d=await jsonFetch('https://api.inaturalist.org/v1/observations?'+params.toString(),5000);
+      return d.results||[];
+    }catch(e){return []}
+  }
+
+  function addINat(records,regional){
+    for(const obs of records){
+      if(!Array.isArray(obs.photos))continue;
+      for(const photo of obs.photos){
+        let raw=photo.medium_url||photo.large_url||photo.url;
+        if(!raw||!/^https?:\/\//i.test(raw)||seen.has(raw))continue;
+
+        // Prefer a reasonably sized image instead of loading the original.
+        if(photo.url && !photo.medium_url){
+          raw=photo.url.replace('/square.','/medium.').replace('/small.','/medium.');
+        }
+
+        seen.add(raw);
+        const votes=Number(obs.faves_count)||0;
+        const score=(regional?300:220)+Math.min(votes,20);
+
+        candidates.push({
+          raw,
+          cached:null,
+          score,
+          w:0,
+          h:0,
+          source:regional?'iNaturalist Research Grade • Alabama':'iNaturalist Research Grade'
+        });
+      }
+    }
+  }
+
+  const inatAL=await fetchINatResearchGrade(true);
+  addINat(inatAL,true);
+
+  if(candidates.length<10){
+    const inatBroad=await fetchINatResearchGrade(false);
+    addINat(inatBroad,false);
+  }
+
+  // 2) FALLBACK SOURCE: GBIF field observations.
+  // Only invoke GBIF if iNaturalist did not provide enough usable photos.
+  if(candidates.length<8){
+    const key=await resolveTaxon(plant.sci);
+
+    async function recordsForScope(scope){
+      const params=new URLSearchParams({
+        mediaType:'StillImage',
+        limit:'60',
+        occurrenceStatus:'PRESENT'
+      });
+      if(scope==='alabama'){params.set('country','US');params.set('stateProvince','Alabama')}
+      else if(scope==='us'){params.set('country','US')}
+      if(key)params.set('taxonKey',key);
+      else params.set('scientificName',plant.sci);
+
+      try{
+        const d=await jsonFetch('https://api.gbif.org/v1/occurrence/search?'+params.toString(),5500);
+        return d.results||[];
+      }catch(e){return []}
+    }
+
+    function addGBIF(records,scope){
+      for(const rec of records){
+        if(!Array.isArray(rec.media))continue;
+        for(const m of rec.media){
+          const raw=m&&m.identifier;
+          if(!raw||!/^https?:\/\//i.test(raw)||seen.has(raw))continue;
+
+          const t=textOf(rec,m);
+          const title=(m.title||'')+' '+(m.description||'');
+          if(EXCLUDE.test(t)||SPECIMEN.test(t)||GRAPHIC.test(t))continue;
+          if(/\b(specimen|herbarium|voucher|identification guide|field guide|fact sheet)\b/i.test(title))continue;
+
+          const w=Number(m.width)||0,h=Number(m.height)||0;
+          let score=scoreRecord(rec,m,scope);
+          // Keep GBIF below Research Grade iNaturalist when both are present.
+          score-=150;
+          if(score<-50000)continue;
+
+          seen.add(raw);
+          let cached=null;
+          if(rec.key){
+            cached='https://api.gbif.org/v1/image/cache/800x/occurrence/'+rec.key+'/media/'+md5(raw);
+          }
+
+          candidates.push({
+            raw,cached,score,w,h,
+            source:TRUSTED.test(t)?'Institutional/educational observation':'GBIF observation'
+          });
+        }
+      }
+    }
+
+    const [alabama,us]=await Promise.all([
+      recordsForScope('alabama'),
+      recordsForScope('us')
+    ]);
+    addGBIF(alabama,'alabama');
+    addGBIF(us,'us');
+
+    if(candidates.length<8){
+      const all=await recordsForScope('all');
+      addGBIF(all,'all');
+    }
+  }
+
+  // Add a little randomness among similarly ranked photos so the same plant
+  // does not always show the identical image.
+  candidates.sort((a,b)=>{
+    const base=(b.score-a.score);
+    if(Math.abs(base)>8)return base;
+    return Math.random()-.5;
+  });
+
+  const trimmed=candidates.slice(0,50);
+  photoMemory.set(cacheKey,trimmed);
+
+  try{
+    const saved=JSON.parse(localStorage.getItem(PHOTO_CACHE_KEY)||'{}');
+    saved[cacheKey]=trimmed;
+    const keys=Object.keys(saved);
+    while(keys.length>80)delete saved[keys.shift()];
+    localStorage.setItem(PHOTO_CACHE_KEY,JSON.stringify(saved));
+  }catch(e){}
+
+  return trimmed;
+}
+
+const state={mode:"quiz",questions:[],index:0,score:0,answered:false,photoToken:0,difficulty:"mixed",style:"standard",pool:"all",field:false};
+const $=id=>document.getElementById(id);
+function shuffle(a){a=[...a];for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+
+const LOOKALIKE_GROUPS=[
+["White oak","Post oak","Chestnut oak","Southern red oak","Black oak"],
+["Big bluestem","Little bluestem","Indiangrass","Broomsedge bluestem","Purpletop"],
+["Tall fescue","Orchardgrass","Annual ryegrass","Bahiagrass","Bermudagrass"],
+["Johnsongrass","Foxtail grass","Crabgrass","Dallisgrass","Japanese stiltgrass"],
+["Winged sumac","American beautyberry","Common persimmon","Flowering dogwood","Eastern redcedar"],
+["Chinese privet","Japanese honeysuckle","Kudzu","English ivy","Japanese climbing fern"],
+["Common milkweed","Butterfly milkweed"],
+["Trifolium repens","Trifolium incarnatum"]
+];
+
+function enrichPlants(){
+  const invasiveNames=new Set(["Japanese stiltgrass","Crownvetch","Chinaberry","Chinese bushclover","Kudzu","Chinese privet","Japanese honeysuckle","Callery pear","Nandina","English ivy","Garlic mustard","Cogongrass","Tree-of-heaven","Mimosa","Japanese climbing fern"]);
+  PLANTS.forEach(p=>{
+    p.invasive=!!p.invasive||invasiveNames.has(p.name);
+    if(p.invasive)p.native=false;
+    else if(INTRODUCED_NAMES.has(p.name))p.native=false;
+    if(!p.habitats){
+      p.habitats=[];
+      if(p.pasture)p.habitats.push("pasture");
+      if(p.group==="grass"||p.group==="forb"||p.group==="legume")p.habitats.push("old-field");
+      if(p.group==="woody"||p.group==="vine"||p.group==="shrub")p.habitats.push("woodland");
+      if(p.rare)p.habitats.push("glade");
+      if(p.turkey)p.habitats.push("wildlife");
+      if(p.name==="Common buttercup"||p.name==="Joe-Pye weed"||p.name==="Ironweed")p.habitats.push("wet");
+    }
+    if(!p.difficulty)p.difficulty=p.rare||p.invasive?"hard":(p.group==="grass"||p.group==="forb"?"medium":"easy");
+  });
+}
+enrichPlants();
+
+function relatedOptions(correct,style="standard"){
+  const pool=PLANTS.filter(p=>p.name!==correct.name);
+  let picked=[];
+  if(style==="lookalike"){
+    const group=LOOKALIKE_GROUPS.find(g=>g.includes(correct.name));
+    if(group)picked=shuffle(pool.filter(p=>group.includes(p.name))).slice(0,3);
+  }
+  const sameGenus=shuffle(pool.filter(p=>sameTaxonValue(p.genus,correct.genus)));
+  const sameFamily=shuffle(pool.filter(p=>sameTaxonValue(p.family,correct.family)&&!sameTaxonValue(p.genus,correct.genus)));
+  const sameGroup=shuffle(pool.filter(p=>p.group===correct.group&&!sameTaxonValue(p.family,correct.family)));
+  const broad=shuffle(pool.filter(p=>!sameGenus.includes(p)&&!sameFamily.includes(p)&&!sameGroup.includes(p)));
+  for(const source of [sameGenus,sameFamily,sameGroup,broad]){
+    for(const p of source){if(picked.length<3&&!picked.some(x=>x.name===p.name))picked.push(p)}
+  }
+  return shuffle([correct,...picked.slice(0,3)]);
+}
+
+function difficultyPool(level){
+  if(level==="mixed")return PLANTS;
+  const rank={easy:1,medium:2,hard:3,expert:4}[level]||2;
+  return PLANTS.filter(p=>{
+    const d={easy:1,medium:2,hard:3,expert:4}[p.difficulty]||2;
+    return Math.abs(d-rank)<=1;
+  });
+}
+function lookalikePool(){const names=[...new Set(LOOKALIKE_GROUPS.flat())];return PLANTS.filter(p=>names.includes(p.name))}
+function weakPlants(){
+  const stats=JSON.parse(localStorage.getItem("naPlantStats")||"{}");
+  return PLANTS.filter(p=>stats[p.name]&&stats[p.name].answered>0).sort((a,b)=>{
+    const A=stats[a.name],B=stats[b.name];
+    return (A.correct/A.answered)-(B.correct/B.answered);
+  });
+}
+function recordAnswer(p,correct){
+  const stats=JSON.parse(localStorage.getItem("naPlantStats")||"{}");
+  const x=stats[p.name]||{answered:0,correct:0};
+  x.answered++;if(correct)x.correct++;
+  stats[p.name]=x;localStorage.setItem("naPlantStats",JSON.stringify(stats));updateStats();
+}
+function updateStats(){
+  const stats=JSON.parse(localStorage.getItem("naPlantStats")||"{}");
+  let seen=0,a=0,c=0,weak=0;
+  Object.values(stats).forEach(x=>{seen++;a+=x.answered;c+=x.correct;if(x.answered>=2&&x.correct/x.answered<.7)weak++});
+  if($("statSeen"))$("statSeen").textContent=seen;
+  if($("statAccuracy"))$("statAccuracy").textContent=a?Math.round(c/a*100)+"%":"0%";
+  if($("statWeak"))$("statWeak").textContent=weak;
+}
+
+function makeQuestions(pool,style){
+  pool=shuffle(pool);
+  if(pool.length<10)pool=shuffle(PLANTS);
+  const selected=[];
+  // Balanced categories when possible.
+  const categories=["grass","forb","woody","legume","vine","shrub"];
+  for(const cat of shuffle(categories)){
+    const p=pool.find(x=>x.group===cat&&!selected.includes(x));
+    if(p)selected.push(p);
+  }
+  for(const p of pool)if(selected.length<10&&!selected.includes(p))selected.push(p);
+  return shuffle(selected.slice(0,10)).map(correct=>({correct,options:relatedOptions(correct,style)}));
+}
+
+function startQuiz(customPool=null,style=null){
+  state.field=false;state.style=style||$("quizStyle")?.value||state.style||"standard";state.difficulty=$("quizDifficulty")?.value||state.difficulty||"mixed";
+  if($("quizDifficultyGame"))$("quizDifficultyGame").value=state.difficulty;
+  if($("quizStyleGame"))$("quizStyleGame").value=state.style;
+  if($("quizPoolGame"))$("quizPoolGame").value=state.pool||"all";
+  state.currentPhotoCandidates=[];
+  let base=customPool||selectedQuizPool();
+  let pool=customPool?base:difficultyPool(state.difficulty).filter(p=>base.includes(p));
+  if(state.pool==="inat"&&pool.length<4){$("feedback").textContent="Sync at least 4 iNaturalist plant taxa before using the iNaturalist-only quiz pool.";return}
+  if(state.style==="lookalike")pool=lookalikePool();
+  if(state.style==="review"){
+    const weak=weakPlants().slice(0,25);
+    pool=weak.length>=4?weak:pool;
+  }
+  state.questions=makeQuestions(pool,state.style);
+  state.index=0;state.score=0;state.answered=false;$("restart").classList.add("hidden");renderQuestion();
+}
+function startReview(){state.style="review";$("quizStyle").value="review";$("quizStyleGame").value="review";$("quizStart").classList.add("hidden");$("quizGame").classList.remove("hidden");const weak=weakPlants();startQuiz(weak.length>=4?weak:PLANTS,"standard")}
+
+function showQuizStart(){
+  $("quizStart").classList.remove("hidden");
+  $("quizGame").classList.add("hidden");
+  $("quizDifficulty").value=state.difficulty||"mixed";
+  $("quizStyle").value=state.style||"standard";
+  if($("quizPool"))$("quizPool").value=state.pool||"all";
+}
+async function startSelectedQuiz(){
+  state.difficulty=$("quizDifficulty").value;
+  state.style=$("quizStyle").value;
+  state.pool=$("quizPool")?.value||"all";
+  const btn=$("startQuizBtn");
+  const needsTax=state.pool!=="regional"&&INAT_PLANTS.some(p=>!validTaxonomyValue(p.family)||!validTaxonomyValue(p.genus));
+  if(needsTax){btn.disabled=true;btn.textContent="Preparing imported plant taxonomy…";try{await enrichImportedTaxa(INAT_PLANTS)}finally{btn.disabled=false;btn.textContent="Start 10-Question Quiz"}}
+  $("quizDifficultyGame").value=state.difficulty;
+  $("quizStyleGame").value=state.style;
+  $("quizStart").classList.add("hidden");
+  $("quizGame").classList.remove("hidden");
+  if(state.style==="review")startReview();else startQuiz();
+}
+function setMode(mode){
+  state.mode=mode;
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  ["quiz","field","learn","inat","habitat","turkey","pasture","invasive"].forEach(x=>{if($(x))$(x).classList.toggle("hidden",x!==mode)});
+  if(mode==="quiz"){ if(state.questions.length && !$("quizGame").classList.contains("hidden")) renderQuestion(); else showQuizStart(); }
+  if(mode==="field")fieldStart();
+  if(mode==="learn"){renderList("plantGrid",PLANTS);updateStats()}
+  if(mode==="inat")renderInatPanel();
+  if(mode==="turkey")renderList("turkeyGrid",PLANTS.filter(p=>p.turkey));
+  if(mode==="pasture")renderList("pastureGrid",PLANTS.filter(p=>p.pasture));
+  if(mode==="invasive")renderList("invasiveGrid",PLANTS.filter(p=>p.invasive));
+  if(mode==="habitat")renderHabitats();
+}
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+
+function photoHistoryKey(p){return "naPlantPhotos:"+p.sci}
+function choosePhoto(candidates,p){
+  const key=photoHistoryKey(p), recent=JSON.parse(localStorage.getItem(key)||"[]");
+  let usable=candidates.filter(c=>!recent.includes(c.raw));
+  if(usable.length<4)usable=candidates;
+  // Randomize among the strongest candidates instead of always taking #1.
+  const top=usable.slice(0,Math.min(28,usable.length));
+  const chosen=top[Math.floor(Math.random()*top.length)];
+  const updated=[chosen.raw,...recent.filter(x=>x!==chosen.raw)].slice(0,8);
+  localStorage.setItem(key,JSON.stringify(updated));
+  return chosen;
+}
+
+const loadedPhotoCache=new Map();
+
+function prefetchNextQuestionPhoto(){
+  if(state.mode!=="quiz")return;
+  const nextQ=state.questions[state.index+1];
+  if(!nextQ)return;
+  // Start background API work only after the current question's image is on screen.
+  // This prevents next-question prefetching from competing with the image the user
+  // is actively waiting to see.
+  setTimeout(()=>fetchImages(nextQ.correct).catch(()=>{}),250);
+}
+
+function showImage(candidates,p,target="q",allowRefresh=true){
+  const token=++state.photoToken;
+  if(target==="q")state.currentPhotoCandidates=candidates||[];
+  const img=$(target==="q"?"qImage":"fImage"),load=$(target==="q"?"qLoading":"fLoading"),caption=$(target==="q"?"photoCaption":"fCaption");
+  const another=$(target==="q"?$("anotherPhoto"):null);
+  if(another)another.classList.add("hidden");
+  img.onerror=null;img.style.display="none";img.removeAttribute("src");load.style.display="block";
+  load.textContent="Loading a field photograph…";
+
+  const finalFailure=()=>{
+    if(token!==state.photoToken)return;
+    if(allowRefresh){
+      load.textContent="Trying a fresh photo source…";
+      // A previously cached candidate list can become stale when a publisher
+      // changes or removes image URLs. Refresh GBIF once before giving up.
+      loadQuestionPhoto(p,target,true,false);
+    }else{
+      load.textContent="Photo unavailable right now. Continue to the next question.";
+    }
+  };
+
+  if(!candidates || !candidates.length){finalFailure();return}
+
+  // Do not depend on a single GBIF record. Rotate through multiple strong
+  // records and try both GBIF's resized cache and the publisher's raw image.
+  const recent=(()=>{try{return JSON.parse(localStorage.getItem(photoHistoryKey(p))||"[]")}catch(e){return []}})();
+  let pool=candidates.filter(c=>c && c.raw && !recent.includes(c.raw));
+  if(pool.length<4)pool=candidates.filter(c=>c && c.raw);
+  const strong=pool.slice(0,Math.min(30,pool.length));
+  for(let i=strong.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[strong[i],strong[j]]=[strong[j],strong[i]]}
+  const ordered=[...strong,...candidates.filter(c=>c&&c.raw&&!strong.includes(c))];
+
+  // Remember URLs that have failed on this device so later questions do not
+  // waste time retrying the same dead hosts. Prefer the publisher's original
+  // image first; GBIF's resized cache is only a fallback.
+  let badURLs=new Set();
+  try{badURLs=new Set(JSON.parse(localStorage.getItem(BAD_PHOTO_KEY)||"[]"))}catch(e){}
+  const rememberBad=(src)=>{
+    if(!src)return;
+    badURLs.add(src);
+    try{localStorage.setItem(BAD_PHOTO_KEY,JSON.stringify([...badURLs].slice(-120)))}catch(e){}
+  };
+
+  const attempts=[];
+  const seen=new Set();
+  for(const c of ordered.slice(0,24)){
+    for(const src of [c.cached,c.raw]){
+      if(src && !seen.has(src) && !badURLs.has(src)){seen.add(src);attempts.push({src,candidate:c})}
+    }
+  }
+
+  const accept=(attempt,test)=>{
+    if(token!==state.photoToken)return false;
+    loadedPhotoCache.set(attempt.src,test);
+    img.onerror=()=>{
+      if(token!==state.photoToken)return;
+      img.onerror=null;img.style.display="none";
+      tryBatch();
+    };
+    img.src=attempt.src;img.style.display="block";load.style.display="none";
+    const c=attempt.candidate;
+    caption.textContent=(c.source||"Field observation")+" • rotating field/observation photograph";
+    try{
+      const key=photoHistoryKey(p),old=JSON.parse(localStorage.getItem(key)||"[]");
+      localStorage.setItem(key,JSON.stringify([c.raw,...old.filter(x=>x!==c.raw)].slice(0,8)));
+    }catch(e){}
+    if(another && state.currentPhotoCandidates.length>1)another.classList.remove("hidden");
+    if(target==="q")prefetchNextQuestionPhoto();
+    return true;
+  };
+
+  let offset=0,settled=false;
+  function tryBatch(){
+    if(token!==state.photoToken || settled)return;
+    if(offset>=attempts.length){settled=true;finalFailure();return}
+    // Three independent URLs in parallel avoids a single dead host without saturating mobile Safari.
+    const batch=attempts.slice(offset,offset+3);offset+=batch.length;
+    let pending=batch.length;
+    const finishOne=()=>{pending--;if(pending===0 && !settled)tryBatch()};
+    for(const attempt of batch){
+      const cachedImg=loadedPhotoCache.get(attempt.src);
+      if(cachedImg && cachedImg.naturalWidth>=250 && cachedImg.naturalWidth*cachedImg.naturalHeight>=100000){
+        settled=true;accept(attempt,cachedImg);return;
+      }
+      const test=new Image();let done=false;
+      test.decoding="async";
+      const timer=setTimeout(()=>{
+        if(done||settled)return;
+        done=true;rememberBad(attempt.src);
+        test.onload=test.onerror=null;test.src="";finishOne();
+      },1800);
+      test.onload=()=>{
+        if(done||settled)return;done=true;clearTimeout(timer);
+        if(test.naturalWidth<250 || test.naturalWidth*test.naturalHeight<100000){rememberBad(attempt.src);finishOne();return}
+        settled=true;accept(attempt,test);
+      };
+      test.onerror=()=>{if(done||settled)return;done=true;clearTimeout(timer);rememberBad(attempt.src);finishOne()};
+      test.src=attempt.src;
+    }
+  }
+  if(!attempts.length){finalFailure();return}
+  tryBatch();
+}
+function tryAnotherPhoto(){
+  const q=state.questions[state.index];
+  if(!q || !state.currentPhotoCandidates.length)return;
+  const candidates=state.currentPhotoCandidates.slice();
+  const currentSrc=$("qImage").src;
+  const reordered=candidates.filter(c=>c.raw!==currentSrc && c.cached!==currentSrc);
+  if(reordered.length===0){showImage(candidates,q.correct,"q");return}
+  showImage(reordered,q.correct,"q");
+}
+
+async function loadQuestionPhoto(p,target="q",forceRefresh=false,allowRefresh=true){
+  try{
+    const candidates=await fetchImages(p,forceRefresh);
+    showImage(candidates,p,target,allowRefresh);
+  }catch(e){
+    showImage([],p,target,allowRefresh && !forceRefresh);
+  }
+}
+
+function renderQuestion(){
+  const q=state.questions[state.index],correct=q.correct;state.answered=false;
+  $("progress").textContent="Question "+(state.index+1)+" of "+state.questions.length;$("score").textContent="Score: "+state.score;
+  $("feedback").textContent="";$("answerInfo").style.display="none";$("answerInfo").innerHTML="";$("choices").innerHTML="";$("next").classList.add("hidden");$("anotherPhoto").classList.add("hidden");state.currentPhotoCandidates=[];
+  q.options.forEach(o=>{let b=document.createElement("button");b.textContent=o.name;b.onclick=()=>answer(b,o,correct);$("choices").appendChild(b)});
+  loadQuestionPhoto(correct);
+  // The next question is prefetched only after this photo successfully displays.
+}
+// Concise field marks used to explain WHY the correct answer differs from the
+// exact distractors shown in the current question.  These do not affect photo loading.
+const FIELD_MARKS={
+  "Big bluestem":"Tall warm-season bunchgrass, often 4–8 ft at maturity, with flattened bluish basal shoots and a seedhead that commonly divides into 2–3 fingerlike racemes resembling a turkey foot.",
+  "Broomsedge bluestem":"Dense upright bunchgrass that turns coppery-tan in fall and winter; narrow leaves and many small, partly enclosed racemes create a broomlike, straw-colored clump.",
+  "Little bluestem":"Medium-height bunchgrass with flattened bluish-green basal shoots, reddish-copper fall color, and small racemes that develop conspicuous fluffy silvery-white seed tufts.",
+  "Indiangrass":"Tall bunchgrass with broad flat blades, a conspicuous notched 'rifle-sight' ligule at the collar, and a dense golden-bronze plume-like seedhead.",
+  "Switchgrass":"Tall clump-forming grass with flat blades, a noticeable patch of hairs where blade meets sheath, and a large open airy panicle with many small spikelets.",
+  "Eastern gamagrass":"Very robust clump-forming grass with broad cornlike leaves; flowering stems carry thick jointed spikes, with female spikelets lower and male spikelets above.",
+  "Purpletop":"Upright warm-season grass with a loose open panicle on wiry branches; the seedhead often develops a purple cast and droops slightly when mature.",
+  "Tall fescue":"Coarse cool-season bunchgrass with broad dark-green ridged blades, rough upper surfaces, short auricles at the collar, and a branched open panicle at maturity.",
+  "Bahiagrass":"Low to medium perennial sod-forming grass with flat blades and a very distinctive seedhead usually made of two racemes forming a V or Y shape.",
+  "Johnsongrass":"Large rhizomatous grass with broad blades marked by a prominent pale midrib and a large open reddish to purplish panicle; stout underground rhizomes are diagnostic when visible.",
+  "Foxtail grass":"Annual Setaria-type grass with a dense cylindrical bristly seedhead that looks like a bottlebrush or fox tail; blades are flat and the plants often form loose clumps.",
+  "Common milkweed":"Stout upright perennial with opposite broad oval leaves, thick milky sap, rounded clusters of pink-purple flowers, and large warty spindle-shaped pods.",
+  "Butterfly milkweed":"Usually shorter and bushier than common milkweed, with narrow mostly alternate leaves, bright orange flower clusters, spindle-shaped pods, and little or no obvious milky sap.",
+  "Black-eyed Susan":"Hairy upright forb with rough lance-shaped to spoon-shaped leaves and daisy-like heads having yellow rays around a dark brown to black raised central disk.",
+  "Partridge pea":"Slender annual legume with pinnate leaves bearing many small paired leaflets, showy yellow five-petaled flowers, and narrow flat pods that split when mature.",
+  "White clover":"Low creeping perennial rooted at stolon nodes, with three rounded leaflets often bearing a pale chevron and rounded white to pinkish flower heads on leafless stalks.",
+  "Crimson clover":"Upright hairy annual clover with three leaflets and elongated cylindrical crimson flower heads rather than the rounded white heads of white clover.",
+  "Chicory":"Deep-rooted perennial forming a basal rosette of toothed leaves, then stiff branching stems with sparse clasping leaves and sky-blue composite flowers borne directly along the stems.",
+  "Winged sumac":"Shrub or small tree with alternate pinnately compound leaves; the central rachis has a conspicuous leafy wing between leaflets, and dense upright clusters of red fruit persist into fall.",
+  "American beautyberry":"Arching native shrub with opposite simple toothed leaves and exceptionally distinctive tight rings of bright purple berries clustered directly around the stems at leaf nodes.",
+  "Common persimmon":"Small to medium tree with alternate simple entire leaves, dark blocky 'alligator-hide' bark on older trunks, and round orange fruits with a persistent leafy calyx.",
+  "Sweetgum":"Tree with alternate star-shaped palmately lobed leaves, often five pointed lobes, and hanging round woody spiny seed balls; young twigs may develop corky wings.",
+  "Red maple":"Opposite simple leaves with 3–5 pointed lobes and mostly V-shaped sinuses; paired winged samaras and reddish buds, petioles, or fall color are common supporting clues.",
+  "White oak":"Oak with alternate leaves divided into rounded, bristle-free lobes and fairly deep rounded sinuses; mature bark is light gray and flaky, and acorns mature in one season.",
+  "Black oak":"Red-oak-group tree with alternate leaves bearing pointed bristle-tipped lobes; inner bark is yellow-orange and leaf undersides often have rusty hairs in vein axils.",
+  "Pokeweed":"Large fleshy perennial herb with smooth broad leaves, thick often reddish-purple stems, and elongated drooping clusters of dark purple-black berries on reddish stalks.",
+  "Goldenrod":"Upright perennial forb with alternate simple leaves and many tiny yellow composite flower heads grouped into plume-like, wandlike, or flat-topped clusters depending on species.",
+  "Common yarrow":"Perennial forb with aromatic finely dissected fernlike leaves and broad flat-topped clusters of many small white to pale-pink flower heads.",
+  "Marestail":"Annual or biennial forming a narrow upright column; numerous small narrow leaves crowd an unbranched lower stem, with many tiny inconspicuous flower heads near the top.",
+  "Spiny amaranth":"Erect warm-season annual with alternate leaves, dense green flower spikes, and a diagnostic pair of stiff sharp spines at many leaf nodes.",
+  "Bull thistle":"Large biennial thistle with deeply lobed very spiny leaves, prickly winged stems, and large purple flower heads surrounded by spine-tipped bracts.",
+  "Common ragweed":"Branched annual with opposite lower leaves and alternate upper leaves that are deeply divided and fernlike; green male flower spikes occur at branch tips.",
+  "Carolina horsenettle":"Prickly perennial nightshade with wavy or lobed leaves, star-shaped white to pale-purple flowers with yellow anthers, and round yellow tomato-like berries.",
+  "Japanese stiltgrass":"Weak sprawling annual grass with short broad blades that often show a pale silvery stripe along the upper midrib; stems root at nodes and have a delicate bamboo-like appearance.",
+  "Crownvetch":"Trailing or sprawling perennial legume with odd-pinnate leaves bearing many small oval leaflets and rounded crownlike clusters of pink-and-white pea flowers.",
+  "Chinaberry":"Small tree with large alternate bi- or tripinnately compound leaves, serrated leaflets, fragrant lilac-purple flowers, and persistent round yellowish fruits in loose clusters.",
+  "Chinese bushclover":"Upright wiry perennial with alternate trifoliate leaves; leaflets are narrow, often pale or silvery beneath, and tiny cream flowers with purple markings occur in leaf axils.",
+  "Morefield's leatherflower":"Woody-based climbing Clematis with opposite compound leaves and nodding thick-textured urn- to bell-shaped pinkish-purple flowers; the persistent styles become feathery in fruit.",
+  "Alabama larkspur":"Erect perennial with palmately divided leaves and a vertical raceme of spurred blue to violet flowers; the long backward-pointing floral spur is a key larkspur character.",
+  "Small-head gayfeather":"Slender perennial with narrow alternate leaves and a wandlike spike of small purple flower heads that typically open from the top downward; heads are notably small and closely spaced.",
+  "Pretty coreopsis":"Perennial composite with opposite leaves, often narrow or divided, and yellow daisy-like flower heads with toothed ray tips; identify with leaf form, involucral bracts, and rocky-site habit together.",
+  "Cumberland rosinweed":"Large coarse perennial with broad rough leaves, stout resinous stems, and sunflower-like yellow heads; basal and lower leaves are much larger than the upper leaves.",
+  "Gattinger's prairie clover":"Low to medium perennial legume with many tiny narrow leaflets and dense cylindrical flower spikes of small purple-pink pea flowers, typically on open limestone or cedar-glade sites.",
+  "Little-leaved alumroot":"Small rock-dwelling perennial with a basal rosette of rounded to heart-shaped, shallowly lobed leaves and slender mostly leafless stalks carrying many tiny flowers.",
+  "American ginseng":"Woodland herb with a single stem topped by a whorl of usually three palmately compound leaves, each commonly with five leaflets; mature plants produce a central cluster of red berries.",
+  "Large whorled pogonia":"Woodland orchid with a single upright stem bearing a conspicuous whorl of usually five broad leaves near the top and one or two unusual greenish-purple flowers above the whorl.",
+  "Rock clubmoss":"Small evergreen rock-dwelling lycophyte with upright branching shoots densely covered in tiny scale-like leaves; it lacks true flowers and resembles a miniature conifer or mossy club.",
+  "Limerock arrowwood":"Deciduous shrub with opposite simple toothed leaves, arching lateral veins, flat-topped clusters of small white flowers, and blue-black drupes; limestone habitat is an important supporting clue.",
+  "Little sweet Betsy":"Trillium with one whorl of three broad mottled leaves and a single sessile upright maroon flower centered directly above the leaves; petals are relatively broad and not strongly twisted.",
+  "Twisted trillium":"Trillium with three mottled leaves and a sessile dark maroon flower whose narrow petals spread and twist noticeably, giving the flower a distinctive propeller-like appearance.",
+  "Yellow trillium":"Trillium with three mottled leaves and a single sessile upright yellow to yellow-green flower centered above the leaf whorl; petals are broader and less twisted than in twisted trillium.",
+  "Culver's root":"Tall upright perennial with leaves arranged in conspicuous whorls around the stem and long narrow terminal spikes of many tiny white to pale flowers.",
+  "Post oak":"Oak with thick alternate leaves having rounded bristle-free lobes; a pair of large middle lobes often creates a distinctive cross- or Maltese-cross-shaped outline.",
+  "Southern red oak":"Red-oak-group tree with bristle-tipped lobes and highly variable leaves, commonly with a long narrow terminal lobe and a rounded or bell-shaped base.",
+  "Chestnut oak":"Oak with thick oblong leaves that are unlobed but have large rounded crenate teeth, producing a chestnut-like margin; bark becomes deeply ridged and blocky on mature trees.",
+  "Mockernut hickory":"Hickory with alternate pinnately compound leaves usually bearing 7–9 leaflets, a hairy leaf rachis and underside, and thick-husked nuts; twigs are stout with large buds.",
+  "Shagbark hickory":"Hickory with compound leaves usually bearing five leaflets, the terminal three much larger, and mature trunks with long loose plates of bark peeling away in shaggy strips.",
+  "Shortleaf pine":"Native pine with needles mostly in bundles of two, commonly about 3–5 inches long, small ovoid cones with modest prickles, and distinctive small resin pits or pockets in bark plates on mature trees.",
+  "Virginia pine":"Small pine with short 1.5–3 inch needles in bundles of two that are often twisted, and small persistent prickly cones that may remain attached for years; crowns are often irregular.",
+  "Eastern redcedar":"Evergreen conifer with scale-like adult foliage and prickly awl-like juvenile leaves, fibrous reddish bark, and blue berry-like seed cones rather than true berries.",
+  "Flowering dogwood":"Small understory tree with opposite simple leaves whose lateral veins curve strongly toward the tip; mature bark is broken into small blocky plates, and red drupes follow the showy bracts.",
+  "Common pawpaw":"Understory shrub or small tree with very large alternate entire leaves that broaden toward the tip, naked brown buds, dark maroon spring flowers, and large oblong green fruits.",
+  "Blackberry":"Arching or erect thorny bramble with biennial canes and palmately compound leaves usually with 3–5 serrated leaflets; canes tend to be more upright than dewberry.",
+  "Dewberry":"Low trailing bramble with prickly canes that sprawl along the ground and may root at tips; leaves are usually trifoliate and flowers/fruits resemble blackberry but sit on a prostrate plant.",
+  "Common sunflower":"Coarse tall annual with rough broad usually alternate leaves, hairy stems, and large yellow heads around a dark disk; lower leaves may be opposite and leaf blades are often heart-shaped.",
+  "Maximilian sunflower":"Tall rhizomatous perennial sunflower with numerous narrow lance-shaped often folded leaves crowded along the stem and many yellow flower heads produced toward the upper stem in fall.",
+  "Ironweed":"Tall perennial with alternate lance-shaped serrated leaves and terminal clusters of vivid purple flower heads composed only of disk florets, lacking showy ray petals.",
+  "Joe-Pye weed":"Tall perennial with large serrated leaves in whorls or opposite pairs, often purplish stems, and broad domed clusters of many dusty pink to mauve tiny flower heads.",
+  "Bee balm":"Aromatic mint-family perennial with square stems, opposite toothed leaves, and rounded terminal clusters of lavender tubular flowers; leaves smell minty or oregano-like when crushed.",
+  "Spotted beebalm":"Aromatic mint with square stems and opposite leaves; flowers occur in stacked whorls surrounded by showy pale pink to whitish bracts spotted with purple, creating a layered appearance.",
+  "Mountain mint":"Aromatic square-stemmed perennial with opposite very narrow linear leaves and dense terminal clusters of small white flowers often speckled purple; foliage has a strong mint scent.",
+  "Curly dock":"Perennial with a basal rosette and tall flowering stalk; long narrow leaves have strongly wavy or crisped margins, and rusty-brown winged fruits persist densely along branched stems.",
+  "Broadleaf plantain":"Low basal rosette of broad oval leaves with 5–9 strong parallel veins running from the leaf base; leafless stalks carry long narrow spikes of tiny flowers and seeds.",
+  "Common chickweed":"Low mat-forming cool-season annual with opposite small oval leaves, a single line of hairs along the stem, and tiny white flowers whose deeply split petals make them look like ten petals.",
+  "Henbit":"Square-stemmed cool-season annual with opposite rounded scalloped leaves; upper leaves clasp the stem without petioles and purple tubular flowers arise in whorls near the top.",
+  "Common buttercup":"Low to medium perennial with a basal cluster of deeply divided or lobed leaves and glossy yellow five-petaled flowers on slender stems; flowers have the characteristic shiny buttercup surface.",
+  "Bermudagrass":"Low warm-season sod grass spreading aggressively by stolons and rhizomes; narrow blades arise from creeping stems and 3–7 slender fingerlike seed spikes radiate from one point.",
+  "Dallisgrass":"Coarse perennial bunchgrass with broad blades and a seedhead of several thick racemes spaced alternately along a central stem; dark sticky anthers may be conspicuous when flowering.",
+  "Crabgrass":"Warm-season annual with prostrate to ascending stems that root at lower nodes, relatively broad hairy or smooth blades, and several fingerlike racemes radiating near the stem tip.",
+  "Orchardgrass":"Cool-season bunchgrass with strongly flattened basal shoots, folded blue-green leaves, and a branched panicle made of dense one-sided clumps of spikelets.",
+  "Annual ryegrass":"Glossy cool-season grass with shiny leaf undersides and clasping auricles at the collar; seedheads are slender unbranched spikes with spikelets attached edgewise along the stem.",
+  "Kudzu":"Large vigorous twining vine with alternate leaves divided into three large leaflets, often shallowly lobed, hairy stems, purple pea-like flower clusters, and flattened hairy pods.",
+  "Chinese privet":"Dense semi-evergreen shrub with opposite glossy oval leaves, small white flowers in terminal clusters, and abundant blue-black berries; opposite branching helps separate it from many woody invasives.",
+  "Japanese honeysuckle":"Twining vine with opposite oval leaves, paired fragrant tubular white-to-yellow flowers, and black berries; older stems become woody and shredded while remaining vine-like.",
+  "Callery pear":"Small tree with alternate glossy rounded to ovate leaves with finely toothed margins, masses of white spring flowers, small hard brown fruits, and often thorny branchlets on escaped plants.",
+  "Nandina":"Evergreen to semi-evergreen shrub with multiple cane-like stems and finely divided bi- or tripinnate leaves whose many narrow leaflets often turn reddish; bright red berry clusters persist in winter.",
+  "English ivy":"Evergreen woody vine with alternate leathery leaves; juvenile climbing shoots usually have 3–5 palmately veined lobes, while adult flowering shoots bear unlobed leaves and spherical umbels.",
+  "Garlic mustard":"Cool-season biennial with first-year kidney-shaped basal leaves and second-year triangular heart-shaped toothed leaves on an erect stem; crushed foliage smells distinctly of garlic and flowers are small and white with four petals.",
+  "Cogongrass":"Perennial rhizomatous grass forming dense colonies, with stiff blades whose pale midrib is usually conspicuously off-center and fluffy silvery-white cylindrical seedheads in spring.",
+  "Tree-of-heaven":"Fast-growing tree with very large alternate pinnately compound leaves; leaflets are mostly entire except for gland-tipped teeth near the base, and crushed foliage has a strong unpleasant odor.",
+  "Mimosa":"Small spreading tree with delicate alternate bipinnately compound leaves made of many tiny leaflets, showy pink powder-puff flowers, and flat brown beanlike pods.",
+  "Japanese climbing fern":"Perennial climbing fern with wiry twining rachises bearing repeatedly divided triangular frond segments; fertile segments become narrower and fringed with spore-bearing tissue rather than flowers."
+};
+
+const SPECIES_DETAILS={
+  "Crotalaria spectabilis":{
+    id:"Tall, erect annual legume with large simple (one-leaflet) alternate leaves, long terminal racemes of large yellow pea-like flowers, and conspicuous inflated pods that darken at maturity.",
+    ecology:"Introduced showy rattlebox of disturbed ground, roadsides and old fields. It contains pyrrolizidine alkaloids; all parts are toxic to livestock, with seeds especially hazardous, so it is an important pasture and hay contaminant to recognize."
+  },
+  "Orbexilum pedunculatum":{
+    id:"Erect perennial legume, usually about 1–3 ft tall, with alternate trifoliate leaves whose narrow oblong to lance-shaped leaflets have entire margins. Dense blue-violet to pale-violet pea-flower racemes are held on conspicuously long bare stalks above the foliage; the flat fruits are nearly round and typically one-seeded.",
+    ecology:"Native perennial of open woods, woodland edges and prairies in the central and eastern United States. As a native legume it contributes floral resources and plant diversity in open woodland and grassland communities."
+  },
+  "Bignonia capreolata":{
+    id:"Woody climbing vine with opposite leaves, each typically divided into two glossy leaflets plus a branched terminal tendril. Orange-red to yellow trumpet-shaped flowers occur in clusters, and a cut stem shows the cross-shaped internal pattern that gives crossvine its name.",
+    ecology:"Native southeastern vine of woods, edges and stream corridors. Its flowers provide nectar for pollinators and hummingbirds, while the persistent woody vine adds vertical structure and cover."
+  },
+  "Amphicarpaea bracteata":{
+    id:"Thin twining or trailing herbaceous vine with alternate trifoliate leaves; the broad ovate to triangular leaflets are usually hairy and the terminal leaflet is longer-stalked. Small pale-purple to creamy pea flowers occur in axillary clusters, and the plant also produces inconspicuous fertile flowers near or below the soil surface.",
+    ecology:"Habitat: moist deciduous woods, thickets and shaded woodland edges. Ecological value: native legume that fixes nitrogen and produces both above-ground and underground fruits; seeds are used by wildlife and the species contributes to woodland-edge food webs."
+  },
+  "Acalypha gracilens":{
+    id:"Slender erect annual, usually 1–3 ft tall, with hairy green to reddish stems and alternate narrow oblong- to lance-shaped leaves with serrate to crenate margins. Tiny axillary male and female flower clusters are subtended by toothed green bracts; the fruit develops as a small three-lobed capsule.",
+    ecology:"Habitat: open woods, sandy or rocky openings and disturbed ground. Ecological value: native annual component of early-successional and open-woodland plant communities; its small seeds contribute to the seed resource used by insects and granivorous wildlife."
+  }
+};
+const IMPORT_GUIDE_CACHE_KEY="naPlantImportedGuide_v3";
+function cleanNote(p){
+  const n=(p.note||"").trim();
+  return /observed by you|inaturalist import/i.test(n)?"":n;
+}
+function storedImportedGuide(sci){
+  try{return (JSON.parse(localStorage.getItem(IMPORT_GUIDE_CACHE_KEY)||"{}")||{})[sci]||null}catch(e){return null}
+}
+function saveImportedGuide(p){
+  if(!p||!p.sci)return;
+  try{
+    const all=JSON.parse(localStorage.getItem(IMPORT_GUIDE_CACHE_KEY)||"{}")||{};
+    all[p.sci]={id:p.guideId||"",ecology:p.guideEcology||""};
+    localStorage.setItem(IMPORT_GUIDE_CACHE_KEY,JSON.stringify(all));
+  }catch(e){}
+}
+function usefulSentences(text,kind){
+  const clean=String(text||"").replace(/\[[^\]]*\]/g," ").replace(/\s+/g," ").trim();
+  const sentences=clean.match(/[^.!?]+[.!?]+/g)||[clean];
+  const morphology=/\b(leaf|leaves|leaflet|stem|stems|bark|flower|flowers|fruit|pod|seed|raceme|spike|panicle|tendril|thorn|spine|hair|pubesc|rhizome|stolon|rosette|vine|shrub|tree|grass|forb|annual|perennial|height|tall|erect|trailing|twining|lobed|serrate|opposite|alternate|whorl)\b/i;
+  const ecology=/\b(habitat|woodland|woods|forest|prairie|savanna|field|wetland|riparian|stream|bottomland|glade|barren|pollinator|wildlife|host|forage|grazing|livestock|toxic|invasive|conservation|rare|threat|endanger|seed dispers|nectar|mast|cover|nest|food|fire|succession)\b/i;
+  const rx=kind==="ecology"?ecology:morphology;
+  const idHeavy=/\b(leaf|leaves|leaflet|stem|bark|petal|sepal|bract|lobed|serrate|opposite leaves|alternate leaves|height of|identified by)\b/i;
+  const chosen=sentences.filter(x=>rx.test(x)&&!/\bis a species of flowering plant\b/i.test(x)&&(kind!=="ecology"||!idHeavy.test(x))).slice(0,3);
+  return chosen.join(" ").trim();
+}
+async function fetchWikipediaGuide(p){
+  if(!p||!p.sci)return null;
+  try{
+    const api="https://en.wikipedia.org/w/api.php?action=parse&format=json&origin=*&prop=text&page="+encodeURIComponent(p.sci);
+    const d=await jsonFetch(api,7000);
+    const html=d&&d.parse&&d.parse.text&&d.parse.text["*"];
+    if(!html)return null;
+    const doc=new DOMParser().parseFromString(html,"text/html");
+    doc.querySelectorAll("sup,table,style,script,.mw-editsection").forEach(n=>n.remove());
+    const sections=[...doc.querySelectorAll("h2,h3")];
+    function sectionText(names){
+      const h=sections.find(x=>names.some(n=>x.textContent.trim().toLowerCase().includes(n)));
+      if(!h)return "";
+      let text="",n=h.nextElementSibling;
+      while(n&&!/^H[23]$/.test(n.tagName)){if(n.tagName==="P")text+=" "+n.textContent;n=n.nextElementSibling}
+      return text.trim();
+    }
+    const intro=[...doc.querySelectorAll(".mw-parser-output > p")].slice(0,4).map(x=>x.textContent).join(" ");
+    const morph=sectionText(["description","morphology","identification"]);
+    const eco=sectionText(["ecology","habitat","distribution","range"]);
+    return {id:usefulSentences(morph||intro,"id"),ecology:usefulSentences(eco||intro,"ecology")};
+  }catch(e){return null}
+}
+async function ensureImportedGuide(p){
+  if(!p||!p.inaturalist||SPECIES_DETAILS[p.sci]||FIELD_MARKS[p.name])return;
+  const cached=storedImportedGuide(p.sci);
+  if(cached){p.guideId=cached.id||"";p.guideEcology=cached.ecology||"";if(p.guideId||p.guideEcology)return}
+  const g=await fetchWikipediaGuide(p);
+  if(g){p.guideId=g.id||"";p.guideEcology=g.ecology||"";saveImportedGuide(p)}
+}
+async function ensureExplanationData(plants){
+  const list=[...new Map((plants||[]).filter(Boolean).map(p=>[p.sci,p])).values()];
+  await Promise.all(list.map(async p=>{if(p.inaturalist){await enrichImportedTaxon(p);await ensureImportedGuide(p)}}));
+  try{localStorage.setItem(INAT_STORE_KEY,JSON.stringify(INAT_PLANTS))}catch(e){}
+}
+function fieldMark(p){
+  const detail=SPECIES_DETAILS[p.sci];
+  if(detail?.id)return detail.id;
+  if(FIELD_MARKS[p.name])return FIELD_MARKS[p.name];
+  if(p.guideId)return p.guideId;
+  const fam=validTaxonomyValue(p.family)?p.family:"its botanical family";
+  return "A species-specific field description is not yet available for this imported taxon. Treat its placement in "+fam+" as supporting taxonomy only, not as a visual identification character.";
+}
+
+
+const ECOLOGY_DETAILS={
+  "Andropogon gerardii":"Habitat: prairies, savannas, open woodlands and other sunny native grasslands. Wildlife value: tall clumps provide nesting, escape and winter cover, while the associated insect community is important to grassland food webs. Agriculture: productive native warm-season forage when grazed during active growth and given adequate recovery.",
+  "Andropogon virginicus":"Habitat: old fields, roadsides, thin pastures and open woodland edges, especially on low-fertility or disturbed sites. Wildlife value: standing clumps provide structure and winter cover, although dense rank stands can suppress more diverse forb communities. Agriculture: generally low forage value after maturity and often an indicator of low soil fertility or underutilized pasture.",
+  "Schizachyrium scoparium":"Habitat: dry prairies, glades, savannas, open woods and old fields. Wildlife value: bunches provide nesting and escape cover and support a diverse grassland insect community. Agriculture: palatable native warm-season forage when young; quality declines as stems mature.",
+  "Sorghastrum nutans":"Habitat: prairies, savannas, open woods and restored native grasslands. Wildlife value: provides vertical cover and supports insects and seed-eating wildlife within diverse native grassland communities. Agriculture: valuable native warm-season forage, especially when managed before seed-stalk maturity.",
+  "Panicum virgatum":"Habitat: prairies, open fields, stream margins and moist to moderately dry grasslands. Wildlife value: dense upright cover can benefit nesting and wintering wildlife; seeds and associated insects add food value. Agriculture: productive native warm-season forage and also used for erosion control and biomass plantings.",
+  "Tripsacum dactyloides":"Habitat: moist prairies, bottomlands, stream terraces, ditches and rich open ground. Wildlife value: large bunches provide strong screening and nesting structure. Agriculture: highly productive native warm-season forage with good palatability when vegetative.",
+  "Tridens flavus":"Habitat: old fields, woodland openings, roadsides and dry disturbed ground. Wildlife value: contributes seed and structure to early-successional plant communities. Agriculture: usually a minor forage component rather than a preferred pasture grass.",
+  "Schedonorus arundinaceus":"Introduced cool-season forage grass widely planted in southeastern pastures, roadsides and disturbed fields. Agriculture: highly persistent and productive, but common endophyte-infected stands can cause fescue toxicosis in cattle, reducing gain, reproduction and heat tolerance. Ecology: dense sod can reduce native forb and grass diversity and simplify wildlife habitat.",
+  "Paspalum notatum":"Introduced warm-season sod-forming forage common in pastures, roadsides and disturbed sunny ground across the Southeast. Agriculture: durable, grazing-tolerant forage with moderate quality; best value occurs during active summer growth. Ecology: dense sod protects soil but generally provides less plant diversity than native grass-forb communities.",
+  "Sorghum halepense":"Introduced invasive perennial of roadsides, field margins, cropland, hayfields and disturbed pastures. Agriculture: a serious pasture and hay weed because of aggressive rhizomes and seed production; young or stressed growth can accumulate cyanogenic compounds, and drought/frost-stressed plants can also present nitrate concerns. Wildlife value is generally secondary to its management impact.",
+  "Asclepias syriaca":"Habitat: old fields, roadsides, open woods and sunny disturbed ground. Host value: an important larval host for monarch butterflies and other milkweed-feeding insects; flowers also supply nectar to many pollinators. Agriculture: contains cardiac glycosides and is not desirable livestock forage, though poisoning usually requires substantial consumption where better forage is limited.",
+  "Asclepias tuberosa":"Habitat: dry open woods, glades, prairies, roadsides and sunny fields. Host value: a monarch larval host and a high-value nectar source for butterflies, bees and other pollinators. Conservation value: useful component of diverse native grassland and savanna restoration.",
+  "Rudbeckia hirta":"Habitat: old fields, roadsides, prairies and other sunny disturbed sites. Wildlife value: flowers support native bees and other pollinators, while mature seedheads are used by small seed-eating birds. It is a common early-successional native that helps maintain forb diversity after disturbance.",
+  "Chamaecrista fasciculata":"Habitat: old fields, roadsides, open woods, prairies and disturbed sunny sites. Host value: larval host for several sulphur butterflies, including cloudless sulphur and sleepy orange. Wildlife value: abundant seed is eaten by quail and other birds, and the plant supports pollinators and insects important to brood-rearing wildlife. Agriculture: a native legume that fixes nitrogen but is primarily valued for wildlife rather than as major livestock forage.",
+  "Trifolium repens":"Introduced cool-season legume common in lawns, grazed pastures and moist disturbed ground. Agriculture: high-quality, protein-rich forage that also fixes nitrogen; lush pure stands can increase risk of frothy bloat in ruminants, so it is usually most useful as part of a grass-legume mixture. Flowers are heavily used by bees.",
+  "Trifolium incarnatum":"Introduced annual cool-season legume commonly planted in fields, food plots and winter pasture. Agriculture: nutritious forage and nitrogen fixer; usually managed as a seasonal companion to grasses. Wildlife value: flowers support pollinators and foliage/seed can contribute to wildlife food plots.",
+  "Cichorium intybus":"Introduced perennial often planted in grazing systems and wildlife plots and also found along roadsides and disturbed ground. Agriculture: deep-rooted, drought-tolerant, highly digestible summer forage; rotational grazing helps maintain stand persistence. Flowers are used by pollinators.",
+  "Rhus copallinum":"Habitat: old fields, woodland edges, roadsides and open uplands. Wildlife value: dense colonies provide edge cover, and persistent fruits are eaten by many birds and mammals, especially outside the peak growing season. It is a useful shrub component of early-successional and open-woodland habitat.",
+  "Callicarpa americana":"Habitat: woodland edges, thickets, open forests and disturbed uplands. Wildlife value: fruits are eaten by numerous songbirds and mammals; arching shrubs also provide low cover. It responds well to periodic disturbance and can be valuable in open pine and early-successional systems.",
+  "Diospyros virginiana":"Habitat: old fields, woodland edges, open forests and bottomlands. Wildlife value: fruits are heavily used by deer, raccoons, foxes, opossums and many other animals; trees also add mast diversity to woodland edges and openings. Agriculture: fruiting trees can be valuable to wildlife-oriented land management but are not a major forage species.",
+  "Liquidambar styraciflua":"Habitat: bottomlands, moist uplands, old fields and disturbed forest edges. Ecology: fast colonization makes it important in succession and soil stabilization, but dense sapling stands can compete with desired oak, pine or herbaceous habitat. Seeds are used by some birds and small mammals.",
+  "Quercus alba":"Habitat: mesic to dry upland forests and mixed hardwood stands. Wildlife value: acorns are a major hard-mast food for deer, wild turkey, squirrels and many other species; oaks also support exceptionally diverse caterpillar communities that feed nesting birds. Forestry value: important high-quality hardwood and a cornerstone species in eastern forest food webs.",
+  "Quercus velutina":"Habitat: dry to mesic upland forests, ridges and slopes. Wildlife value: acorns provide hard mast for deer, turkey and small mammals, while oak foliage supports a large diversity of native insects. Forestry value: contributes to upland hardwood stands and fire-associated oak communities.",
+  "Phytolacca americana":"Habitat: woodland edges, fence rows, disturbed soil and early-successional openings. Wildlife value: berries are heavily used by many birds and some mammals, making it a useful soft-mast plant in disturbed habitat. Agriculture: foliage and roots contain toxic compounds and it should not be treated as livestock forage.",
+  "Solidago":"Habitat: old fields, prairies, roadsides, open woods and many other sunny habitats. Ecological value: one of the most important late-season native forb groups for bees, wasps, flies and other pollinators; it also supports numerous specialist insects and provides seed and structure into winter.",
+  "Achillea millefolium":"Habitat: fields, roadsides, open woods and disturbed grasslands. Ecological value: flat flower clusters provide accessible nectar and pollen to many small native bees, flies and beneficial predatory insects. It generally occurs as a minor forb component rather than a dominant forage plant.",
+  "Ambrosia artemisiifolia":"Habitat: disturbed soil, old fields, crop edges and open ground. Wildlife value: despite being a major human allergen, its seed is highly valuable to quail, doves and other granivorous birds, and foliage supports many insects. Agriculture: often considered a crop or pasture weed when abundant.",
+  "Solanum carolinense":"Habitat: pastures, hayfields, roadsides and disturbed sunny ground. Agriculture: persistent pasture weed spread by roots and seed; foliage and especially fruits contain glycoalkaloids and can be toxic to livestock if eaten in sufficient quantity. Wildlife value is limited relative to its management concern.",
+  "Microstegium vimineum":"Introduced invasive annual of shaded roadsides, stream corridors, forest edges and disturbed woodlands. Ecology: can form dense carpets that suppress native herbs and tree regeneration and alter forest-floor habitat. Agriculture: generally poor forage and more important as an invasive-habitat concern than a grazing resource.",
+  "Lespedeza cuneata":"Introduced invasive perennial common in roadsides, old fields, rights-of-way and disturbed grasslands. Ecology: dense stands can displace native forbs and grasses and reduce habitat diversity. Agriculture: mature plants are fibrous and relatively low-quality forage; tannins further limit use, so it is generally undesirable in native habitat and pasture management.",
+  "Panax quinquefolius":"Habitat: rich, shaded deciduous forests, especially moist mesic slopes and coves with fertile soils. Ecological context: a long-lived understory herb whose fruits are eaten and dispersed by wildlife. Conservation: wild populations are vulnerable to overharvest and habitat loss; collection and trade are regulated, and local populations should be protected rather than harvested casually.",
+  "Viburnum bracteatum":"Habitat: limestone-associated woods, rocky slopes and bluffs in a very restricted portion of the southeastern United States, including northeastern Alabama. Wildlife value: like other native viburnums, flowers support insects and fruits can be used by birds. Conservation: an extremely rare shrub with very limited global distribution; protecting known populations and their limestone habitat is the overriding management priority.",
+  "Clematis morefieldii":"Habitat: limestone slopes and rocky forest-edge habitats in the Huntsville Mountains of north Alabama and nearby Tennessee. Conservation: federally endangered and highly range-restricted; habitat protection and avoidance of disturbance to known populations are critical. Its rarity gives it far greater conservation significance than forage or agricultural value.",
+  "Trillium cuneatum":"Habitat: rich deciduous woods, often on calcareous or base-rich soils. Ecological value: spring ephemeral that contributes early-season woodland diversity and is visited by small insects; seeds are dispersed by ants. Conservation: woodland populations are slow to recover from digging or repeated disturbance.",
+  "Trillium stamineum":"Habitat: rich hardwood forests and calcareous slopes, especially in the southeastern United States. Ecological value: spring woodland forb with ant-dispersed seeds. Conservation: localized populations are best protected from digging, repeated trampling and canopy/hydrology changes.",
+  "Trillium luteum":"Habitat: rich moist deciduous woods, often over limestone or other base-rich soils. Ecological value: spring ephemeral with ant-dispersed seed. Conservation: localized woodland populations are sensitive to collection and repeated site disturbance.",
+  "Asimina triloba":"Habitat: rich bottomlands, stream terraces and mesic forest understories. Host value: primary larval host of the zebra swallowtail butterfly. Wildlife value: fruits are eaten by mammals, and clonal thickets can provide understory structure. It can become locally dense where disturbance and browsing favor it.",
+  "Rubus allegheniensis":"Habitat: old fields, forest edges, openings and disturbed uplands. Wildlife value: berries are important soft mast for birds and mammals, thorny canes provide escape and nesting cover, and flowers support pollinators. Agriculture: can become a pasture or fence-line nuisance when thickets expand.",
+  "Rubus trivialis":"Habitat: fields, roadsides, open woods and woodland edges. Wildlife value: fruits provide soft mast, flowers support pollinators, and trailing thorny growth supplies low cover. Agriculture: may be tolerated for wildlife value at edges but can interfere with grazing or access when abundant.",
+  "Helianthus annuus":"Habitat: open disturbed ground, field edges and sunny roadsides. Wildlife value: large seedheads feed many birds and small mammals, while flowers provide pollen and nectar for native bees. Agriculture: the species is also the wild ancestor of cultivated sunflower.",
+  "Helianthus maximiliani":"Habitat: prairies, roadsides and open grasslands. Wildlife value: late flowers support pollinators and abundant seed feeds birds; tall stems add winter structure. Agriculture: can contribute browse/forage when young but is usually valued more for native habitat than production pasture.",
+  "Vernonia gigantea":"Habitat: moist fields, bottomlands, woodland edges and open disturbed sites. Ecological value: late-season flowers are strongly used by butterflies and native bees, extending nectar availability into late summer. It contributes tall forb structure to early-successional habitat.",
+  "Eutrochium purpureum":"Habitat: moist woodland edges, meadows, seeps and stream-associated openings. Ecological value: large flower clusters are major nectar resources for butterflies, bees and other insects. It is especially useful where moist-site native forb diversity is a habitat objective.",
+  "Monarda fistulosa":"Habitat: prairies, glades, open woods and sunny field edges. Ecological value: abundant nectar supports native bees, butterflies and hummingbirds; aromatic foliage also supports specialized insects. It is a high-value forb in pollinator-oriented native plantings.",
+  "Monarda punctata":"Habitat: dry sandy or rocky openings, roadsides and open woodland. Ecological value: an especially strong nectar source for native bees, wasps and other beneficial insects, including specialized solitary wasps. It performs well in dry, frequently disturbed native habitat.",
+  "Pycnanthemum tenuifolium":"Habitat: prairies, open woods, roadsides and sunny fields. Ecological value: one of the most consistently insect-visited native forb groups, supplying nectar to bees, wasps, butterflies, flies and beneficial predators through summer.",
+  "Pueraria montana var. lobata":"Introduced invasive vine of roadsides, forest edges, abandoned fields and disturbed slopes. Ecology: rapid growth can smother shrubs and trees, shade native vegetation and alter succession. Agriculture/forestry: dense infestations reduce usable land and complicate access and vegetation management.",
+  "Ligustrum sinense":"Introduced invasive shrub of bottomlands, forest edges, stream corridors and disturbed woods. Ecology: forms dense shade-producing thickets that suppress native shrubs and herbs and alter understory structure. Fruits are eaten by birds, which also disperse the seed, helping the invasion spread.",
+  "Lonicera japonica":"Introduced invasive vine common along forest edges, roadsides, thickets and disturbed woods. Ecology: blankets and competes with native vegetation, although its flowers and foliage are used by some wildlife. Its wildlife use generally does not offset the habitat cost of dense invasion.",
+  "Pyrus calleryana":"Introduced invasive tree of roadsides, old fields and disturbed woodland edges. Ecology: rapidly colonizes open ground and can form dense thorny stands that replace native early-successional vegetation. Fruits are spread by birds and other animals.",
+  "Nandina domestica":"Introduced invasive ornamental shrub that escapes into woodlands and edges. Ecology: can persist beneath forest canopy and compete with native understory vegetation. Wildlife caution: berries contain cyanogenic compounds and have been associated with bird poisonings after heavy consumption.",
+  "Hedera helix":"Introduced invasive evergreen vine of shaded woods, urban forest edges and disturbed sites. Ecology: dense ground mats suppress native herbs and regeneration, while climbing vines add weight and shade to trees. It provides some cover and late floral resources, but dense invasion degrades native understory diversity.",
+  "Alliaria petiolata":"Introduced invasive biennial of moist forests, floodplains and shaded edges. Ecology: displaces native spring herbs and can interfere with soil fungi important to native tree seedlings. It is an important woodland invasive even where it has little direct agricultural effect.",
+  "Imperata cylindrica":"Introduced highly invasive perennial grass of roadsides, disturbed ground, pine lands and open sites. Ecology: forms dense rhizomatous stands with high fuel loads that exclude native vegetation and can alter fire behavior. Agriculture/forestry: poor forage and a major quarantine/management concern.",
+  "Ailanthus altissima":"Introduced invasive tree of roadsides, forest gaps, field edges and disturbed urban/rural sites. Ecology: spreads by seed and root suckers, forms dense colonies and releases allelopathic compounds that inhibit competitors. It is also the preferred host of spotted lanternfly, an invasive insect of agricultural concern.",
+  "Albizia julibrissin":"Introduced invasive tree of roadsides, stream banks, woodland edges and disturbed openings. Ecology: spreads readily into open habitat, fixes nitrogen and can alter early-successional plant communities. Flowers are used by pollinators, but escaped populations compete with native woody vegetation.",
+  "Lygodium japonicum":"Introduced invasive climbing fern of wet woods, stream corridors, ditches and disturbed forest edges. Ecology: twining fronds can blanket shrubs and small trees, suppress native vegetation and create vertical fuel ladders that carry fire into woody vegetation."
+};
+
+ECOLOGY_DETAILS["Gillenia stipulata"]="Habitat: dry to mesic open woods, woodland edges, rocky slopes and open upland sites, especially in the central and eastern United States. Ecological value: native perennial of open woodland and savanna-like communities; flowers are available to native pollinators. It has little direct pasture value and is generally more important as a component of native woodland-forb diversity.";
+ECOLOGY_DETAILS["Berchemia scandens"]="Habitat: woodland edges, bottomlands, stream terraces, thickets and fence rows. Wildlife value: fruits are eaten by birds and other wildlife, and the tough climbing stems contribute dense edge cover. It is a native woody vine and generally has little importance as livestock forage.";
+
+const INTRODUCED_NAMES=new Set([
+  "Tall fescue","Bahiagrass","Johnsongrass","White clover","Crimson clover","Chicory",
+  "Bull thistle","Japanese stiltgrass","Crownvetch","Chinaberry","Chinese bushclover",
+  "Bermudagrass","Dallisgrass","Crabgrass","Orchardgrass","Annual ryegrass",
+  "Kudzu","Chinese privet","Japanese honeysuckle","Callery pear","Nandina","English ivy",
+  "Garlic mustard","Cogongrass","Tree-of-heaven","Mimosa","Japanese climbing fern"
+]);
+const PASTURE_WEEDS=new Set([
+  "Johnsongrass","Foxtail grass","Marestail","Spiny amaranth","Bull thistle",
+  "Carolina horsenettle","Curly dock","Broadleaf plantain","Common chickweed",
+  "Henbit","Common buttercup","Japanese stiltgrass","Cogongrass","Crownvetch",
+  "Chinese bushclover"
+]);
+const FORAGE_PLANTS=new Set([
+  "Big bluestem","Little bluestem","Indiangrass","Switchgrass","Eastern gamagrass",
+  "Tall fescue","Bahiagrass","White clover","Crimson clover","Chicory",
+  "Bermudagrass","Dallisgrass","Crabgrass","Orchardgrass","Annual ryegrass",
+  "Partridge pea"
+]);
+const LIVESTOCK_CAUTION=new Set([
+  "Johnsongrass","Carolina horsenettle","Common buttercup","Spiny amaranth","Bull thistle"
+]);
+
+function plantStatus(p){
+  if(p.invasive)return {label:"Invasive • introduced",sentence:"Status: introduced and invasive in this region."};
+  if(p.native===false || INTRODUCED_NAMES.has(p.name))return {label:"Introduced",sentence:"Status: introduced (nonnative) in this region."};
+  if(p.native===true)return {label:"Native",sentence:"Status: native."};
+  return {label:"",sentence:""};
+}
+
+function habitatContext(p){
+  const labels={
+    "old-field":"old fields and early-successional openings",
+    "pasture":"pastures and hayfields",
+    "woodland":"woodlands and forest edges",
+    "glade":"glades, barrens and rocky openings",
+    "wet":"wet ground, seeps, riparian areas or bottomlands",
+    "wildlife":"wildlife-managed openings"
+  };
+  const vals=[...(p.habitats||[])].filter(x=>x!=="my-property").map(x=>labels[x]||x);
+  if(!vals.length)return "";
+  return "Habitat: commonly associated in this app with "+[...new Set(vals)].join(", ")+".";
+}
+
+function agriculturalImportance(p){
+  const bits=[];
+  if(FORAGE_PLANTS.has(p.name)){
+    if(["Big bluestem","Little bluestem","Indiangrass","Switchgrass","Eastern gamagrass"].includes(p.name))
+      bits.push("Agriculture: can contribute useful native warm-season forage when grazed while vegetative and allowed adequate recovery");
+    else
+      bits.push("Agriculture: used or potentially useful as forage in managed pasture systems");
+  }
+  if(PASTURE_WEEDS.has(p.name))
+    bits.push("Agriculture: can be a notable pasture or hayfield weed when abundance begins to displace desirable forage or interfere with harvest/grazing");
+  if(LIVESTOCK_CAUTION.has(p.name))
+    bits.push("Livestock: warrants extra attention because toxicity or grazing/hay concerns may occur under particular growth stages or environmental conditions");
+  else if(p.pasture && !bits.length)
+    bits.push("Agriculture: relevant to pasture management as a forage component, weed, or indicator of site and management conditions");
+  return bits.join(" ");
+}
+
+function conservationContext(p){
+  if(p.status)return "Conservation: "+String(p.status).replace(/[.;\s]+$/,"")+".";
+  if(p.rare)return "Conservation: locally uncommon or conservation-significant; protect naturally occurring populations and specialized habitat.";
+  return "";
+}
+
+function meaningfulGuideEcology(p){
+  let s=String(p.guideEcology||"").replace(/\s+/g," ").trim();
+  if(!s)return "";
+  // Reject the exact failure seen in prior builds: taxonomy/range boilerplate or ID characters masquerading as ecology.
+  if(/\b(genus|family)\b/i.test(s) && /\b(native to|distributed|ranges?|United States)\b/i.test(s) && !/\b(habitat|forest|wood|field|prairie|glade|wetland|pollinat|wildlife|host|forage|toxic|invasive|conservation|seed dispers|nectar)\b/i.test(s))return "";
+  const sentences=s.match(/[^.!?]+[.!?]+/g)||[s];
+  const positive=/\b(habitat|forest|woodland|woods|field|prairie|savanna|glade|barren|wetland|riparian|stream|bottomland|pollinat|wildlife|host|forage|graz|livestock|toxic|invasive|conservation|rare|threat|endanger|seed dispers|nectar|mast|cover|nest|food|browse|disturb|fire|succession)\b/i;
+  const idHeavy=/\b(leaf|leaves|leaflet|stem|bark|flower shape|petal|sepal|bract|lobed|serrate|opposite leaves|alternate leaves|whorl of|height of|identified by)\b/i;
+  return sentences.filter(x=>positive.test(x)&&!idHeavy.test(x)).slice(0,3).join(" ").trim();
+}
+
+function statusBadgeHTML(p){
+  const s=plantStatus(p);
+  if(!s.label)return "";
+  return "<br><span class='badge'>"+s.label.toUpperCase()+"</span>";
+}
+
+
+const ECOLOGY_GROUP_CONTEXT={
+  grass:{
+    habitat:"Open grasslands, fields, roadsides, savannas, prairies or pasture-like habitats depending on species.",
+    wildlife:"Grasses can provide nesting structure, escape cover, seed, and insect-rich habitat used by birds and other wildlife.",
+    agriculture:"Agricultural value ranges from highly useful forage to troublesome pasture weed; species-specific status is shown when known."
+  },
+  forb:{
+    habitat:"Open fields, woodland edges, roadsides, glades, prairies, disturbed ground or forest understories depending on species.",
+    wildlife:"Forbs often contribute nectar, pollen, seed, browse, and host-plant value for insects and other wildlife.",
+    agriculture:"Some forbs are useful forage or wildlife plants, while others are pasture weeds or toxic to livestock."
+  },
+  legume:{
+    habitat:"Fields, prairies, open woods, roadsides, disturbed ground or pasture-like sites depending on species.",
+    wildlife:"Legumes can support pollinators, provide seed or browse, and often enrich food webs through nitrogen fixation.",
+    agriculture:"Many legumes are valuable forage or soil-building plants, although some are invasive, low-quality, or otherwise undesirable."
+  },
+  woody:{
+    habitat:"Woodlands, forest edges, thickets, old fields, stream corridors or disturbed uplands depending on species.",
+    wildlife:"Woody plants often provide mast, fruit, browse, nesting structure, escape cover, and host habitat for insects.",
+    agriculture:"Agricultural importance is usually related to shade, browse, fence-line encroachment, invasive spread, or woodland/pasture management."
+  },
+  shrub:{
+    habitat:"Thickets, woodland edges, old fields, open woods and disturbed uplands depending on species.",
+    wildlife:"Shrubs often provide fruit, browse, nesting cover, and dense escape structure.",
+    agriculture:"Shrubs may be useful for wildlife cover but can also encroach into pasture or interfere with access and forage production."
+  },
+  vine:{
+    habitat:"Woodland edges, thickets, stream corridors, fence rows and disturbed sites depending on species.",
+    wildlife:"Vines can provide fruit, flowers and dense cover, although invasive species may overwhelm native vegetation.",
+    agriculture:"Vines are usually more important as habitat components or management concerns than as livestock forage."
+  },
+  orchid:{
+    habitat:"Specialized woodland, wetland, meadow or rocky habitats depending on species.",
+    wildlife:"Orchids contribute to native plant diversity and often have specialized pollination and fungal relationships.",
+    agriculture:"Generally little direct forage value; conservation and habitat protection are usually more important."
+  },
+  fern:{
+    habitat:"Woodlands, shaded slopes, cliffs, wetlands or moist disturbed ground depending on species.",
+    wildlife:"Ferns contribute ground-layer structure, cover and plant diversity; some species can dominate disturbed sites.",
+    agriculture:"Usually limited forage value, though invasive species can create serious vegetation-management problems."
+  }
+};
+
+function speciesSpecificStatusContext(p){
+  const bits=[];
+  const status=plantStatus(p);
+  if(status.sentence)bits.push(status.sentence);
+
+  if(p.status)bits.push("Conservation: "+String(p.status).replace(/[.;\s]+$/,"")+".");
+  else if(p.rare)bits.push("Conservation: conservation-significant or locally uncommon; protect naturally occurring populations and specialized habitat.");
+
+  if(p.invasive)bits.push("Management: invasive populations should generally be contained or controlled to protect native plant communities and habitat diversity.");
+  else if(p.native===false || INTRODUCED_NAMES.has(p.name))bits.push("Biogeography: this species is nonnative in the region; ecological effects depend on whether it remains localized or becomes invasive.");
+
+  return bits.join(" ");
+}
+
+function universalEcologyFallback(p){
+  const ctx=ECOLOGY_GROUP_CONTEXT[p.group]||ECOLOGY_GROUP_CONTEXT.forb;
+  const parts=[];
+
+  const habitat=habitatContext(p);
+  if(habitat)parts.push(habitat);
+  else if(ctx.habitat)parts.push("Habitat: "+ctx.habitat);
+
+  if(p.turkey){
+    parts.push("Wildlife value: relevant to early-successional or open-habitat wildlife management through food, cover, seed, browse, or associated insects depending on season.");
+  }else if(ctx.wildlife){
+    parts.push("Ecological value: "+ctx.wildlife);
+  }
+
+  const ag=agriculturalImportance(p);
+  if(ag)parts.push(ag);
+  else if(ctx.agriculture)parts.push("Agriculture: "+ctx.agriculture);
+
+  const statusExtra=speciesSpecificStatusContext(p);
+  if(statusExtra)parts.push(statusExtra);
+
+  return parts.join(" ");
+}
+
+function ecologicalImportance(p){
+  const status=plantStatus(p);
+  const curated=ECOLOGY_DETAILS[p.sci]||ECOLOGY_DETAILS[p.name]||"";
+  const guide=meaningfulGuideEcology(p);
+  const ag=agriculturalImportance(p);
+  const conservation=conservationContext(p);
+  const parts=[];
+
+  // 1) Always show origin/invasive status consistently.
+  if(status.sentence)parts.push(status.sentence);
+
+  // 2) Prefer species-specific curated ecology.
+  if(curated){
+    parts.push(curated);
+  }else{
+    // 3) For every other species, use filtered species-specific web-guide ecology if available,
+    // then fill any remaining categories with the universal ecology engine.
+    if(guide)parts.push(guide);
+
+    const fallback=universalEcologyFallback(p);
+    if(fallback)parts.push(fallback);
+  }
+
+  // 4) Add conservation/agriculture information if it was not already covered.
+  const joined=parts.join(" ").toLowerCase();
+  if(conservation && !joined.includes("conservation:"))parts.push(conservation);
+  if(ag && !joined.includes("agriculture:") && !joined.includes("livestock:"))parts.push(ag);
+
+  // 5) Clean duplicates and prohibit accidental ID language in ecology output.
+  let out=parts.filter(Boolean).join(" ").replace(/\s+/g," ").trim();
+  const sentences=(out.match(/[^.!?]+[.!?]+/g)||[out]).map(s=>s.trim());
+  const idHeavy=/\b(look for|identified by|recognizable by|leaf arrangement|leaf shape|leaflet|petal|sepal|bract|stem or bark|overall identification|distinguish)\b/i;
+  const seen=new Set(), cleaned=[];
+  for(const s of sentences){
+    if(idHeavy.test(s))continue;
+    const key=s.toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+    if(!key||seen.has(key))continue;
+    seen.add(key);cleaned.push(s);
+  }
+  return cleaned.join(" ").trim() || universalEcologyFallback(p);
+}
+function hasSpecificFieldMark(p){
+  return !!(SPECIES_DETAILS[p.sci]?.id||FIELD_MARKS[p.name]||p.guideId);
+}
+
+async function ensureEcologyContext(p){
+  if(!p)return p;
+  // Already curated or already has usable species-specific ecology.
+  if(ECOLOGY_DETAILS[p.sci]||ECOLOGY_DETAILS[p.name]||meaningfulGuideEcology(p))return p;
+
+  // For imported taxa, reuse the same field-guide enrichment pipeline so ecology gets
+  // species-specific habitat/wildlife/conservation text when available.
+  if(p.inaturalist){
+    try{
+      await enrichImportedGuide(p);
+      try{
+        const idx=INAT_PLANTS.findIndex(x=>x.sci===p.sci);
+        if(idx>=0)INAT_PLANTS[idx]=p;
+        localStorage.setItem(INAT_STORE_KEY,JSON.stringify(INAT_PLANTS));
+      }catch(e){}
+    }catch(e){}
+  }
+  return p;
+}
+
+function comparisonMark(p){
+  if(!hasSpecificFieldMark(p))return "";
+  const text=fieldMark(p).trim().replace(/\s+/g," ");
+  const sentence=(text.match(/^.*?[.!?](?:\s|$)/)||[text])[0].trim();
+  const clauses=sentence.replace(/[.!?]+$/,'').split(/;\s*/).filter(Boolean);
+  let out=clauses.slice(0,2).join('; ');
+  if(out.length>235){const parts=out.split(/,\s+/);out=parts.slice(0,Math.min(4,parts.length)).join(', ')}
+  return out.replace(/[,:;\s]+$/,'')+'.';
+}
+function sameTaxonValue(a,b){return validTaxonomyValue(a)&&validTaxonomyValue(b)&&String(a).toLowerCase()===String(b).toLowerCase()}
+function comparePlants(correct,d){
+  let relationship="";
+  if(sameTaxonValue(correct.genus,d.genus))relationship="Same genus — ";
+  else if(sameTaxonValue(correct.family,d.family))relationship="Same family — ";
+  const alt=comparisonMark(d);
+  if(alt)return "<div style='margin-top:12px'><b>vs. "+d.name+":</b> "+relationship+"Look for <b>"+d.name+"</b>'s "+alt.charAt(0).toLowerCase()+alt.slice(1)+"</div>";
+  const tax=[];
+  if(validTaxonomyValue(d.genus))tax.push("genus "+d.genus);
+  if(validTaxonomyValue(d.family))tax.push("family "+d.family);
+  return "<div style='margin-top:12px'><b>vs. "+d.name+":</b> "+relationship+"No reliable species-specific morphological separator is cached yet"+(tax.length?"; "+d.name+" is in "+tax.join(", "):"")+". Do not use taxonomy alone as the field mark.</div>";
+}
+function explain(p,options=[]){
+  const distractors=(options||[]).filter(x=>x.name!==p.name);
+  let html="<b>"+p.name+"</b><br><em>"+p.sci+"</em>"+
+    "<br><br><b>Why this fits — overall identification:</b> "+fieldMark(p);
+  if(distractors.length)html+="<br><br><b>How to distinguish it from these choices:</b>"+distractors.map(d=>comparePlants(p,d)).join("");
+  html+="<br><br><b>Ecological, conservation & agricultural context:</b> "+ecologicalImportance(p);
+  html+=statusBadgeHTML(p);
+  return html;
+}
+async function answer(btn,chosen,correct){
+  if(state.answered)return;state.answered=true;
+  [...$("choices").children].forEach(b=>b.disabled=true);
+  const ok=chosen.name===correct.name;if(ok){state.score++;btn.classList.add("good");$("feedback").textContent="Correct!"}
+  else{btn.classList.add("bad");[...$("choices").children].find(b=>b.textContent===correct.name)?.classList.add("good");$("feedback").textContent="Not quite — the answer is "+correct.name+"."}
+  recordAnswer(correct,ok);$("score").textContent="Score: "+state.score;
+  const shownOptions=state.questions[state.index].options;
+  $("answerInfo").innerHTML="Loading species-specific identification details…";$("answerInfo").style.display="block";
+  await ensureExplanationData([correct,...shownOptions]);
+  $("answerInfo").innerHTML=explain(correct,shownOptions);
+  $("next").classList.remove("hidden");$("next").textContent=state.index===9?"Finish — see score":"Next Question";
+}
+$("next").onclick=()=>{if(state.index<9){state.index++;renderQuestion()}else{$("choices").innerHTML="";$("feedback").innerHTML="<div class='scorebig'>"+state.score+" / 10</div>Quiz complete.";$("answerInfo").style.display="none";$("next").classList.add("hidden");$("restart").classList.remove("hidden")}};
+$("restart").onclick=()=>{state.questions=[];showQuizStart()};
+
+function renderList(id,list){
+  const grid=$(id);if(!grid)return;grid.innerHTML="";
+  list.forEach(p=>{
+    let d=document.createElement("div");d.className="plant";
+    d.innerHTML="<b>"+p.name+"</b><em>"+p.sci+"</em><div class='small'>"+p.note+"</div>"+
+      "<div class='small'>Habitat: "+(p.habitats||[]).join(", ")+"</div>"+
+      (p.invasive?"<span class='badge'>Invasive</span> ":"")+
+      (p.rare?"<span class='badge'>"+p.status+"</span>":"")+
+      (p.inaturalist?"<span class='badge'>My iNaturalist</span>":"");
+    grid.appendChild(d)
+  })
+}
+$("learnSearch").oninput=e=>{const q=e.target.value.toLowerCase();renderList("plantGrid",PLANTS.filter(p=>(p.name+" "+p.sci+" "+p.family+" "+(p.habitats||[]).join(" ")).toLowerCase().includes(q)))};
+$("reviewBtn").onclick=()=>{setMode("quiz");$("quizStyle").value="review";startReview()};
+
+function renderHabitats(){
+  const labels={all:"All","old-field":"Old fields",pasture:"Pastures / hayfields",woodland:"Woodlands",glade:"Glades / rocky",wet:"Wet / riparian",wildlife:"Wildlife habitat"};
+  const f=$("habitatFilters");f.innerHTML="";
+  Object.entries(labels).forEach(([key,label])=>{const b=document.createElement("button");b.textContent=label;b.onclick=()=>renderHabitatGrid(key);if(key==="all")b.classList.add("active");f.appendChild(b)});
+  renderHabitatGrid("all");
+}
+function renderHabitatGrid(filter){
+  document.querySelectorAll("#habitatFilters button").forEach(b=>b.classList.toggle("active",b.textContent.toLowerCase().includes(filter.replace("-"," "))||filter==="all"&&b.textContent==="All"));
+  renderList("habitatGrid",filter==="all"?PLANTS:PLANTS.filter(p=>(p.habitats||[]).includes(filter)));
+}
+
+async function fieldStart(){
+  state.field=true;
+  if(INAT_PLANTS.some(p=>!validTaxonomyValue(p.family)||!validTaxonomyValue(p.genus))){try{await enrichImportedTaxa(INAT_PLANTS)}catch(e){}}
+  const level=$("fieldDifficulty")?.value||"hard";
+  const habitat=$("fieldHabitat")?.value||"all";
+  let pool=PLANTS.filter(p=>!p.rare || p.rare && p.difficulty==="hard");
+  pool=difficultyPool(level).filter(p=>pool.includes(p));
+  if(habitat!=="all")pool=pool.filter(p=>(p.habitats||[]).includes(habitat));
+  if(pool.length<10)pool=difficultyPool(level);
+  state.questions=makeQuestions(pool,"lookalike");
+  state.index=0;state.score=0;state.answered=false;renderFieldQuestion();
+}
+function renderFieldQuestion(){
+  const q=state.questions[state.index],correct=q.correct;state.answered=false;
+  $("fieldProgress").textContent="Question "+(state.index+1)+" of 10";$("fieldScore").textContent="Score: "+state.score;
+  $("fFeedback").textContent="";$("fInfo").style.display="none";$("fChoices").innerHTML="";$("fNext").classList.add("hidden");
+  q.options.forEach(o=>{const b=document.createElement("button");b.textContent=o.name;b.onclick=()=>fieldAnswer(b,o,correct);$("fChoices").appendChild(b)});
+  loadQuestionPhoto(correct,"f");
+}
+async function fieldAnswer(btn,chosen,correct){
+  if(state.answered)return;state.answered=true;[...$("fChoices").children].forEach(b=>b.disabled=true);
+  const ok=chosen.name===correct.name;if(ok){state.score++;btn.classList.add("good");$("fFeedback").textContent="Correct!"}else{btn.classList.add("bad");[...$("fChoices").children].find(b=>b.textContent===correct.name)?.classList.add("good");$("fFeedback").textContent="Not quite — "+correct.name}
+  recordAnswer(correct,ok);$("fieldScore").textContent="Score: "+state.score;
+  const shownOptions=state.questions[state.index].options;
+  $("fInfo").innerHTML="Loading species-specific identification details…";$("fInfo").style.display="block";
+  await ensureExplanationData([correct,...shownOptions]);
+  $("fInfo").innerHTML=explain(correct,shownOptions);
+  $("fNext").classList.remove("hidden");$("fNext").textContent=state.index===9?"Finish — see score":"Next Question";
+}
+$("fNext").onclick=()=>{if(state.index<9){state.index++;renderFieldQuestion()}else{$("fChoices").innerHTML="";$("fFeedback").innerHTML="<div class='scorebig'>"+state.score+" / 10</div>Field quiz complete.";$("fInfo").style.display="none";$("fNext").classList.add("hidden");$("fRestart").classList.remove("hidden")}};
+$("fRestart").onclick=()=>{$("fRestart").classList.add("hidden");fieldStart()};
+
+$("startQuizBtn").onclick=()=>startSelectedQuiz();
+$("anotherPhoto").onclick=()=>tryAnotherPhoto();
+$("quizDifficulty").onchange=()=>{state.difficulty=$("quizDifficulty").value};
+$("quizStyle").onchange=()=>{state.style=$("quizStyle").value};
+$("quizDifficultyGame").onchange=()=>{state.difficulty=$("quizDifficultyGame").value; if(state.style==="review")startReview();else startQuiz()};
+$("quizStyleGame").onchange=()=>{state.style=$("quizStyleGame").value; if(state.style==="review")startReview();else startQuiz()};
+$("quizPool").onchange=()=>{state.pool=$("quizPool").value};
+$("quizPoolGame").onchange=()=>{state.pool=$("quizPoolGame").value;$("quizPool").value=state.pool;if(state.style==="review")startReview();else startQuiz()};
+$("inatSync").onclick=()=>syncINaturalist();
+$("inatClear").onclick=()=>clearINaturalist();
+$("inatSearch").oninput=()=>renderInatPanel();
+$("fieldDifficulty").onchange=()=>fieldStart();
+$("fieldHabitat").onchange=()=>fieldStart();
+
+loadInatPlants();state.difficulty="mixed";state.style="standard";state.pool="all";state.questions=[];updateStats();renderInatPanel();showQuizStart();
+// Repair taxonomy in older locally cached iNaturalist imports without requiring a manual clear/re-import.
+if(INAT_PLANTS.some(p=>!validTaxonomyValue(p.family)||!validTaxonomyValue(p.genus))){
+  enrichImportedTaxa(INAT_PLANTS).then(()=>{renderInatPanel();updateStats()}).catch(()=>{});
+}
+</script>
+</body>
+</html>
